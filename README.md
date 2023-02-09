@@ -52,10 +52,14 @@
 
 - Область применения: machine translation, summarization
 
-## Bleu. The Bilingual Evaluation Understudy 
+## [Bleu. The Bilingual Evaluation Understudy](https://aclanthology.org/P02-1040.pdf) 
 
 - Область применения: machine translation, summarization,
 - Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
+
+### Описание
+
+BLEU (Bilingual Evaluation Understudy) - алгоритм который сравнивает совпадение оригинального текста и сгенерированного на соответствие по различным n gram.
 
 ### Пример использования
 
@@ -72,6 +76,91 @@ candidate = [[ground1.split(' ')]]
 bleu_scores = bleu_metric.compute(predictions=ground1,references=candidate)
 print(bleu_scores)
 ```
+
+### Принцип работы
+
+- _R1_: The cat is on the mat.
+- _R2_: There is a cat on the mat.
+- _C1_: The cat and the dog.
+  BLEU считает количество слов в сгененированном предложении, которые встречаются во всех референсах, и делит это количество на длину слова. Авторы утверждают что 1-gram отвечают за _adequacy_, а более длинные n-grams за _fluency_.
+
+#### Пример 1. $BLEU_1$
+
+$BLEU_1(C1) = 3/5 = 0.6$
+Слова the, cat, the. "The" присутствует в R1 и R2. "cat" присутствует в R1 и R2. слова "and" нет в референсах, не учитываем. "the" присутствует, считаем. "dog" - нет.
+По итогу имеем 3/len(C1) = 3/5.
+
+#### Пример 2. $BLEU_1$
+
+С2 = The The The The The.
+$BLEU_1(C2) = 5/5 = 1$
+Слово "The" встречается 5 раз. Поэтому мы получили высокий результат для плохого перевода. Для этого воспользуемся слудующей формулой.
+$Count_{clip} = min(Count,MaxRefCount)$
+
+- Count - количество встречаемости слова (как в примере 1)
+- MaxRefCount - максимальное количество таких слов в одном из референсов
+  Используя это ограничение, мы получаем следующее
+  $BLEU_1(C2) = 2/5 = 0.4$
+  Так как в "The cat is on the mat" слово the встречается 2 раза.
+
+#### Пример 3. $BLEU_1$
+
+- _R1_: The cat is on the mat.
+- _R2_: There is a cat on the mat.
+- _C3_: There is a cat on the mat.
+- _C4_: Mat the cat is on a there.
+  $BLEU_1(C3) = 7/7 = 1$
+  $BLEU_1(C4) = 7/7 = 1$
+  Так как мы не учитываем порядок слов, то оба этих предложения получат максимальный скор.
+  Поэтому мы должны использовать n-gram. Для примера возьмем 2-gram
+  $BLEU_2(C3) = 6/6 = 1$
+  $BLEU_2(C4) = 0/6 = 0$
+  Ни одна биграмма не встречается в референсах в случае с предложением C4.
+
+#### Пример 4. brevity penalty
+
+- C5: of the
+- R3: It is a guide to action that ensures that the military will forever heed Party commands.
+- R4: It is the guiding principle which guarantees the military forces always being under the command of the Party.
+- R5: It is the practical guide for the army always to heed the directions of the party.
+  "of the" встречается в двух примерах целиком, а это значит что BLUE =1
+  Чтобы решить эту проблему, авторы предлагают штрафовать предложения, которые короче чем самый ближайший референс.
+  $BP=e^{(1-r/c)}$
+- r - длина референса
+- с - длина сгенерированного перевода
+
+$BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
+Авторы предлагают в основном использовать N=4, следовательно $w_n=1/N$.
+
+### Ограничения
+
+- ничего не знает об устройстве языка. все токены для него одинаковы.
+- чем больше референсов используется, тем больший BLEU мы получаем. В оригинальном исследовании при использовании 4 референсов и 2, мы получаем 0.3468 и 0.2571 соответсвенно. Поэтому важно учитывать количество референсов при сравнении разных систем.
+-
+
+### Корреляция с человеческими оценками
+
+- корреляция(pearson) с Monolingual Judgments составила 0.99 (оригинальная статья)
+- корреляция(pearson) с Bilingual Judgments составила 0.96 (оригинальная статья)
+- [данная работа 2018 года](https://aclanthology.org/J18-3002.pdf) утверждает следующее: Корреляция BLEU с человеческими оценками очень зависит от деталей оцениваемых систем, точных используемых корпусных текстов и точного протокола, используемого для человеческих оценок. Если это так, то трудно предсказать, будет ли BLEU хорошо коррелировать с человеческими оценками в новом контексте. Даже в их исследовании корреляция сильно разнилась от работы к работе, а речь идет о machine translation,
+
+### Модификации
+
+#### [sacreBLEU](https://github.com/mjpost/sacrebleu)
+
+Так как токенизация сильно влияет на результат, то мы можем получать разные оценки в зависимости от токенизатора. Также в исходном BLEU присутсвует множество параметров, которые будут изменять конечный результат. sacreBLEU приходит на помощь и приводит в порядок данные недостатки.
+
+### Использование в других задачах
+
+#### Dialogue generation
+
+##### [Multi-domain Wizard-of-Oz (MultiWOZ)](https://github.com/budzianowski/multiwoz)
+
+### Ссылки
+
+- https://huggingface.co/spaces/evaluate-metric/bleu
+- https://medium.com/nlplanet/two-minutes-nlp-learn-the-bleu-metric-by-examples-df015ca73a86
+- https://aclanthology.org/P02-1040.pdf
 
 ## Rouge. Recall-Oriented Understudy for Gisting Evaluation
 
