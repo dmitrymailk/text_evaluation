@@ -55,7 +55,7 @@
 ## Bleu. The Bilingual Evaluation Understudy 
 
 - Область применения: machine translation, summarization,
-  Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
+- Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
 
 ### Пример использования
 
@@ -75,103 +75,99 @@ print(bleu_scores)
 
 ## Rouge. Recall-Oriented Understudy for Gisting Evaluation
 
-Область применения: machine translation, image captioning, question generation
-
-Подвиды: rouge-{1/2/3/4}, rouge-l
+- Область применения: machine translation, image captioning, question generation
+- Подвиды: rouge-{1/2/3/4}, rouge-l
 
 ## Meteor. The Metric for Evaluation of Translation with Explicit ORdering
 
-Область применения: machine translation,  image captioning, question generation, summarization
+- Область применения: machine translation,  image captioning, question generation, summarization
 
 ## Cider. Consensus-based Image Description Evaluation
 
-Область применения:  image captioning
+- Область применения:  image captioning
 
 ## Nist.
 
-Область применения:  machine translation
+- Область применения:  machine translation
 
 ## Gtm. The gtm metric 
 
-Область применения:  machine translation
+- Область применения:  machine translation
 
 ## Hlepor. Harmonic mean of enhanced Length Penalty, Precision, n-gram Position difference Penalty, and Recall 
 
-Область применения:  machine translation
+- Область применения:  machine translation
 
 ## Ribes. Rank-based Intuitive Bilingual Evaluation Score
 
-Область применения:  machine translation
+- Область применения:  machine translation
 
 ## dice and masi.
 
-Область применения: генерация описания по картинке с референсом
+- Область применения: генерация описания по картинке с референсом
 
 # Distance-Based Evaluation Metrics for Content Selection
 
 ## Wer. Word error rate 
 
-Область применения: speech recognition systems,
-
-Ограничения: имеет нижнюю оценку в виде 0 (значит что пример идеален), но не имеет верхнюю оценку что делает трудным оценку
+- Область применения: speech recognition systems,
+- Ограничения: имеет нижнюю оценку в виде 0 (значит что пример идеален), но не имеет верхнюю оценку что делает трудным оценку
 
 ## Ter. Translation edit rate 
 
-Область применения:  machine translation
+- Область применения:  machine translation
 
 # Vector Similarity-Based Evaluation Metrics
 
 ## Meant 2.0
 
-Область применения:  machine translation
+- Область применения:  machine translation
 
 ## Yisi
 
-Область применения:  machine translation
+- Область применения:  machine translation
 
 ## Word Mover’s Distance
 
-Область применения:  sentence-level task - image caption generation
+- Область применения:  sentence-level task - image caption generation
 
 ## Sentence Mover’s Distance (smd)
 
-Область применения:  оценка документов?
+- Область применения:  оценка документов?
 
 # n-gram-Based Diversity Metrics
 
 ## Type-Token Ratio (ttr)
 
-Область применения:  оценка разнообразности речи
+- Область применения:  оценка разнообразности речи
 
 ## Self-bleu
 
-Область применения: оценка разнообразности речи
+- Область применения: оценка разнообразности речи
 
 # Explicit Semantic Content Match Metrics
 
 ## Pyramid
 
-Область применения: document summarization,
-
-Модификации: PEAK - Pyramid Evaluation via Automated Knowledge Extraction
+- Область применения: document summarization,
+- Модификации: PEAK - Pyramid Evaluation via Automated Knowledge Extraction
 
 ## Spice. Semantic propositional image caption evaluation
 
-Область применения:  image captioning
+- Область применения:  image captioning
 
 ##  Syntactic Similarity-Based Metrics
 
 ## tesla (Dahlmeier et al., 2011)
 
-Область применения:  machine translation, story generation, question generation,  abstractive text summarization
+- Область применения:  machine translation, story generation, question generation,  abstractive text summarization
 
 # Machine-Learned Evaluation Metrics
 
 ## Enhanced Sequential Inference Model (ESIM)
 
-Область применения:  machine translation
-
-Измеряет похожесть референсов и сгенерированных примеров
+- Область применения:  machine translation
+- Краткое описание: Измеряет похожесть референсов и сгенерированных примеров
 
 # Regression-Based Evaluation
 
@@ -183,16 +179,16 @@ print(bleu_scores)
 
 ## Adem.  Lowe et al. (2017)
 
-Область применения: chat-bots
+- Область применения: chat-bots
 
 ## Huse. Human Unified with Statistical Evaluation. Hashimoto et al. (2019)
 
-Область применения:  dialog and story generation
+- Область применения:  dialog and story generation
 
 ## Bertscore, (Zhang et al., 2020a).
 
-Область применения:  semantic evaluation
-Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
+- Область применения:  semantic evaluation
+- Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
 
 ### Пример использования
 
@@ -208,54 +204,51 @@ print(bert_scores['f1'])
 
 ## Roberta-sts. Kan´e et al. (2019) 
 
-Область применения:  semantic evaluation
+- Область применения:  semantic evaluation
 
 ## bleurt (Sellam et al., 2020)
 
-Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
+- Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
 
 ## comparator evaluator (Zhou & Xu, 2020)
 
-Область применения:  story generation and open domain dialogue response
-
-##
+- Область применения:  story generation and open domain dialogue response
 
 ## [Ranking Generated Summaries by Correctness: An Interesting but Challenging Application for Natural Language Inference](https://aclanthology.org/P19-1213.pdf)
 
-Область применения: abstractive summarization
+- Область применения: abstractive summarization
 
 ## [On Faithfulness and Factuality in Abstractive Summarization](https://aclanthology.org/2020.acl-main.173.pdf)
 
-Область применения: abstractive summarization
+- Область применения: abstractive summarization
 
 ## [Evaluating Semantic Accuracy of Data-to-Text Generation with Natural Language Inference](https://aclanthology.org/2020.inlg-1.19.pdf)
 
-Область применения: data-to-text (D2T) generation
+- Область применения: data-to-text (D2T) generation
 
 ## [Evaluating Factuality in Generation with Dependency-level Entailment](https://aclanthology.org/2020.findings-emnlp.322.pdf)
 
-Область применения:
+- Область применения:
 
 ## [Evaluating the Factual Consistency of Abstractive Text Summarization](https://arxiv.org/abs/1910.12840)
 
-Область применения: abstractive document summarization
+- Область применения: abstractive document summarization
 
 ## Apes. [Question Answering as an Automatic Evaluation Metric for News Article Summarization](https://aclanthology.org/N19-1395.pdf)
 
-Область применения: abstractive document summarization
+- Область применения: abstractive document summarization
 
 ## Perception Score. [Perception Score, A Learned Metric for Open-ended Text Generation Evaluation](https://arxiv.org/pdf/2008.03082v2.pdf) 
 
-Область применения: text generation
-
-Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
+- Область применения: text generation
+- Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
 
 # Composite Metric Scores
 
 ## [Learning-based Composite Metrics for Improved Caption Evaluation](https://aclanthology.org/P18-3003.pdf)
 
-Область применения: image caption
+- Область применения: image caption
 
 ## [Learning Compact Reward for Image Captioning](https://arxiv.org/abs/2003.10925)
 
-Область применения: image caption
+- Область применения: image caption
