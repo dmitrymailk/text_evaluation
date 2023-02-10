@@ -59,7 +59,7 @@
 
 ### Описание
 
-BLEU (Bilingual Evaluation Understudy) - алгоритм который сравнивает совпадение оригинального текста и сгенерированного на соответствие по различным n gram.
+BLEU (Bilingual Evaluation Understudy) - алгоритм который сравнивает совпадение оригинального текста и сгенерированного на соответствие по различным n gram. Изначально был разработан для machine translation.
 
 ### Принцип работы
 
@@ -130,8 +130,8 @@ $BLEU_2(C4) = 0/6 = 0$
 
 $BP=e^{(1-r/c)}$
 
-- r - длина референса
-- с - длина сгенерированного перевода
+- r - длина референса (в токенах)
+- с - длина сгенерированного перевода (в токенах)
 
 $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 
@@ -233,10 +233,102 @@ for candidate in candidates:
 - https://pypi.org/project/sacrebleu/2.3.1/
 - https://machinelearningmastery.com/calculate-bleu-score-for-text-python/
 
-## Rouge. Recall-Oriented Understudy for Gisting Evaluation
+## [Rouge. Recall-Oriented Understudy for Gisting Evaluation (2004)](https://aclanthology.org/W04-1013.pdf)
 
-- Область применения: machine translation, image captioning, question generation
-- Подвиды: rouge-{1/2/3/4}, rouge-l
+- Область применения: machine translation, image captioning, question generation, text summarization
+- Подвиды: ROUGE-N, ROUGE-L, ROUGE-W, ROUGE-S
+
+### Описание
+
+ROUGE (Recall-Oriented Understudy for Gisting Evaluation) - алгоритм который сравнивает совпадение оригинального текста и сгенерированного на соответствие по различным n gram. Изначально был разработан для text summarization.
+
+### Принцип работы
+
+Для того чтобы посчитать ROUGE нам нужно вычислить precision, recall, и F1-score по соответствующим n-gram.
+
+- precision - это отношение количества совпавших n-gram из РЕФЕРЕНСА, к общему количеству n-gram в СГЕНЕРИРОВАННОМ предложении
+- recall - это отношение количества совпавших n-gram из СГЕНЕРИРОВАННОГО предложения, к общему количеству n-gram в РЕФЕРЕНСЕ
+- F1-score - это результат такой формулы $$F1score = 2 * (precision * recall) / (precision + recall)$$
+
+#### ROUGE-N
+
+$$
+\text{ROUGE-N} = \frac{\sum_{S \in \text{references}} \sum_{gram_n \in S} \text{Count}_{match}(\text{gram}_n)}{\sum_{S \in \text{references}} \sum_{gram_n \in S} \text{Count}(\text{gram}_n)}
+$$
+- $\text{Count}(\text{gram}_n)$ - это максимальное число встречаемости 
+- чем больше примеров, тем больше становится знаменатель
+#### Пример 1. $ROUGE_1$
+
+- R: The cat is on the mat.
+- C: The cat and the dog.
+
+Из референса совпадает только 3 слова с сгенеренным предложением.
+
+ROUGE-1 precision = 3 / len(C) = 3 / 5 = 0.6
+
+В сгенеренном предложении только 3 слова совпадают с референсом.
+
+ROUGE-1 recall = 3 / len(R) = 3 / 6 = 0.5
+
+ROUGE-1 $F1score = 2 * (precision * recall) / (precision + recall) = 0.36$
+
+#### Пример 2. $ROUGE_2$
+
+- R: The cat is on the mat.
+- C: The cat and the dog.
+
+Только "The cat" из референса совпадает со сгенеренным предложением.
+
+ROUGE-2 precision = 1/4 = 0.25
+
+ROUGE-2 recall = 1/5 = 0.20
+
+ROUGE-2 $F1score = 2 * (precision * recall) / (precision + recall) = 0.22$
+
+#### Пример 3. ROUGE-L
+
+ROUGE-L - использует принцип [самой длинной общей подпоследовательности](https://en.wikipedia.org/wiki/Longest_common_subsequence), при этом не обязательно чтобы общие слова шли друг за другом, важно лишь чтобы соблюдался их порядок.
+
+- R: The gray and black cat is on the mat.
+- C: The cat and the dog.
+- len(X) - это функция которая возвращает количество слов
+
+Так как нам не важно друг за другом идут слова или нет. Мы можем вытянуть последовательность "The cat the" из референса, игнорируя "gray and black".
+
+ROUGE-L precision = 3/len(C) = 3 / 5 = 0.6
+
+ROUGE-L recall = 3/len(R) = 3 / 9 = 0.333
+
+ROUGE-L $F1score = 2 * (precision * recall) / (precision + recall) = 0.4285$
+
+#### Пример 4. ROUGE-S
+
+ROUGE-S это частный случай ROUGE-L. В ROUGE-S мы можем определять степень свободы поиска общих слов.
+
+- R: The gray cat is on the mat.
+- C: The cat and the dog.
+- len(X) - это функция которая возвращает количество слов
+
+В данном примере мы выставим параметр равным 2, тогда ROUGE-S проигнорирует "gray" и сматчит "the cat". Тогда как $ROUGE_2$ вовсе проигнорировала бы эту последовательность.
+ROUGE-S precision = 1/len(C) = 1 / 5 = 0.2
+
+ROUGE-S recall = 1/len(R) = 1 / 7 = 0.14
+
+ROUGE-S $F1score = 2 * (precision * recall) / (precision + recall) = 0.1666$
+
+### Ограничения
+
+- ничего не знает об устройстве языка. все токены для него одинаковы.
+
+### Корреляция с человеческими оценками
+
+### Модификации
+
+### Использование в других задачах
+
+### Пример использования
+
+### Ссылки
 
 ## Meteor. The Metric for Evaluation of Translation with Explicit ORdering
 
