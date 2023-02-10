@@ -230,6 +230,8 @@ for candidate in candidates:
 - https://huggingface.co/spaces/evaluate-metric/bleu
 - https://medium.com/nlplanet/two-minutes-nlp-learn-the-bleu-metric-by-examples-df015ca73a86
 - https://aclanthology.org/P02-1040.pdf
+- https://pypi.org/project/sacrebleu/2.3.1/
+- https://machinelearningmastery.com/calculate-bleu-score-for-text-python/
 
 ## Rouge. Recall-Oriented Understudy for Gisting Evaluation
 
