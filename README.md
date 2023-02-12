@@ -423,6 +423,7 @@ for key in scores.keys():
 # rouge-2 = 0.05882352692041533
 # rouge-l = 0.4306220045969644
 
+# https://torchmetrics.readthedocs.io/en/stable/text/rouge_score.html
 from torchmetrics.text.rouge import ROUGEScore
 
 rouge = ROUGEScore(accumulate='avg')
@@ -437,6 +438,23 @@ for key in scores.keys():
 # rouge2_fmeasure = 0.05882352963089943
 # rougeL_fmeasure = 0.40789473056793213
 # rougeLsum_fmeasure = 0.40789473056793213
+
+# https://huggingface.co/spaces/evaluate-metric/rouge
+import evaluate
+rouge = evaluate.load('rouge')
+results = rouge.compute(
+    predictions=hypotheses,
+    references=references
+)
+for key in results.keys():
+    f1_score = results[key]
+    print(f"{key} = {f1_score}")
+# видим почти идеальное совпадение с предыдущим, только только потому что torchmetrics почти полностью скопировал код отсюда
+# https://github.com/google-research/google-research/tree/master/rouge
+# rouge1 = 0.40789473684210525
+# rouge2 = 0.058823529411764705
+# rougeL = 0.40789473684210525
+# rougeLsum = 0.40789473684210525
 ```
 
 ### Ссылки
