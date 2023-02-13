@@ -146,9 +146,12 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 
 - корреляция(pearson) с Monolingual Judgments составила 0.99 (оригинальная статья)
 - корреляция(pearson) с Bilingual Judgments составила 0.96 (оригинальная статья)
-- [данная работа 2018 года](https://aclanthology.org/J18-3002.pdf) утверждает следующее: Корреляция BLEU с человеческими оценками очень зависит от деталей оцениваемых систем, точных используемых корпусных текстов и точного протокола, используемого для человеческих оценок. Если это так, то трудно предсказать, будет ли BLEU хорошо коррелировать с человеческими оценками в новом контексте. Даже в их исследовании корреляция сильно разнилась от работы к работе, а речь идет о machine translation,
 
-#### [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation](https://aclanthology.org/D16-1230.pdf)
+#### [A Structured Review of the Validity of BLEU (30 August 2017)](https://aclanthology.org/J18-3002.pdf)
+
+утверждает следующее: Корреляция BLEU с человеческими оценками очень зависит от деталей оцениваемых систем, точных используемых корпусных текстов и точного протокола, используемого для человеческих оценок. Если это так, то трудно предсказать, будет ли BLEU хорошо коррелировать с человеческими оценками в новом контексте. Даже в их исследовании корреляция сильно разнилась от работы к работе, а речь идет о machine translation
+
+#### [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
 
 В данной работе рассматривается корреляция качества генерации диалога и метрик. Показано что на датасетах Twitter Corpus и Ubuntu Dialogue Corpus корреляция(Spearman, Pearson) с метрикой BLEU-4 составляет 0.3417, 0.1392 и 0.1218, 0.1132 соответсвенно. В общем очень низкая. Тогда как человеком который отмечал релевантность текста от 1 до 5 составила в среднем 0.95.
 
@@ -350,7 +353,7 @@ Y1 справляется с саммаризацией лучше чем Y2, п
 - Лучшая метрика на датасете DUC 2001, 2002 - R-SU9, R-W-1.2 (разница в Pearson’s корреляции сотые доли)
 - Лучшая метрика на датасете DUC 2003 - **R-L**, R-SU4, R-W-1.2 (разница в Pearson’s корреляции сотые доли)
 
-#### [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation](https://aclanthology.org/D16-1230.pdf)
+#### [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
 
 В данной работе рассматривается корреляция качества генерации диалога и метрик. Показано что на датасетах Twitter Corpus и Ubuntu Dialogue Corpus корреляция(Spearman, Pearson) с метрикой ROUGE-L составляет 0.1235, 0.09714 и 0.05405, 0.06401 соответственно. В общем очень низкая. Тогда как человеком который отмечал релевантность текста от 1 до 5 составила около 0.95.
 
@@ -542,7 +545,7 @@ for key in results.keys():
 
 ## [FineD-Eval: Fine-grained Automatic Dialogue-Level Evaluation (29 Oct 2022)](https://arxiv.org/pdf/2210.13832v2.pdf)
 
-- Область применения: machine translation, image captioning, question generation, text summarization
+- Область применения: dialogue-Level evaluation
 
 ### Описание
 
