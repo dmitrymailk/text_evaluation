@@ -467,9 +467,48 @@ for key in results.keys():
 - https://towardsdatascience.com/the-ultimate-performance-metric-in-nlp-111df6c64460
 - https://medium.com/nlplanet/two-minutes-nlp-learn-the-rouge-metric-by-examples-f179cc285499
 
-## Meteor. The Metric for Evaluation of Translation with Explicit ORdering
+## [Meteor. The Metric for Evaluation of Translation with Explicit ORdering](https://aclanthology.org/W05-0909.pdf)
 
-- Область применения: machine translation,  image captioning, question generation, summarization
+- Область применения: machine translation, image captioning, question generation, summarization
+
+### Пример использования
+
+```python
+# https://huggingface.co/spaces/evaluate-metric/meteor
+import evaluate
+
+meteor = evaluate.load('meteor')
+predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
+references = ["It is a guide to action that ensures that the military will forever heed Party commands"]
+
+results = meteor.compute(
+    predictions=predictions,
+    references=references
+)
+results
+# результат совпадает с NLTK, потому что эта либа и есть обертка над NLTK.
+print(results['meteor'])
+# 0.6944444444444445
+
+from nltk.translate.meteor_score import meteor_score
+
+hypothesis1 = "It is a guide to action which ensures that the military always obeys the commands of the party".split()
+reference1 = "It is a guide to action that ensures that the military will forever heed Party commands".split()
+
+print(round(meteor_score(
+    [reference1],
+    hypothesis1),
+    4
+))
+# 0.6944
+
+print(round(meteor_score([
+    ['this', 'is', 'a', 'cat']],
+	['non', 'matching', 'hypothesis']),
+    4
+))
+# 0.0
+```
 
 ## Cider. Consensus-based Image Description Evaluation
 
@@ -641,8 +680,15 @@ depth.
 
 ### Пример использования
 
+```python
+# исходный код слишком ужасен
+# необходима полная переработка для широкого использования
+```
+
 ### Ссылки
-- 
+
+- https://github.com/e0397123/FineD-Eval
+
 ## Enhanced Sequential Inference Model (ESIM)
 
 - Область применения:  machine translation
