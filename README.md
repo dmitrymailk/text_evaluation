@@ -469,7 +469,22 @@ for key in results.keys():
 
 ## [Meteor. The Metric for Evaluation of Translation with Explicit ORdering](https://aclanthology.org/W05-0909.pdf)
 
-- Область применения: machine translation, image captioning, question generation, summarization
+- Область применения: machine translation
+
+### Корреляция с человеческими оценками
+
+Для оценки корреляции авторы использовали датасет:
+
+- DARPA/TIDES 2003 Arabic-to-English and Chinese-to-English
+
+**Arabic-to-English** - 664 sentences.
+**Chinese-to-English** - 920 sentences.
+
+У каждого предложения имеется по 4 референса. Каждая оценка перевода производилась 2 судьями по 2 Adequacy and a Fluency Score. В этой работе, авторы усредняли предыдущие 2 метрики, назвали его Combined Score.
+
+На датасете Chinese-to-English TIDES 2003 корреляция (Pearson) с METEOR=0.964, BLEU=0.817, NIST=0.892. Данная корреляция является **system level**. system level означает, что они взяли все оценки предложений, которые предоставила система перевода и взяли все оценки которые сделали люди для этой системы, потом усреднили оценки для автоматических метрик и для оценок пользователей. На основе этого они провели анализ корреляции.
+
+Также был проведен анализ корреляции(Pearson) между **индивидуальными** оценками METEOR и человеческими оценками одних и тех же предложений. По итогу в среднем для **Arabic Dataset** они получили **0.347**, а для **Chinese Dataset** **0.331**. Авторы также отмечают что в данных датасетах в некоторых местах низкий уровень согласия между людьми. В результате _нормализации_ этих оценок, корреляция стала **0.403** и **0.365**.
 
 ### Пример использования
 
@@ -496,14 +511,14 @@ hypothesis1 = "It is a guide to action which ensures that the military always ob
 reference1 = "It is a guide to action that ensures that the military will forever heed Party commands".split()
 
 print(round(meteor_score(
-    [reference1],
-    hypothesis1),
-    4
+  [reference1],
+  hypothesis1),
+  4
 ))
 # 0.6944
 
 print(round(meteor_score([
-    ['this', 'is', 'a', 'cat']],
+  ['this', 'is', 'a', 'cat']],
 	['non', 'matching', 'hypothesis']),
     4
 ))
