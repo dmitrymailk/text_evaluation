@@ -467,11 +467,90 @@ for key in results.keys():
 - https://towardsdatascience.com/the-ultimate-performance-metric-in-nlp-111df6c64460
 - https://medium.com/nlplanet/two-minutes-nlp-learn-the-rouge-metric-by-examples-f179cc285499
 
-## [Meteor. The Metric for Evaluation of Translation with Explicit ORdering](https://aclanthology.org/W05-0909.pdf)
+## [Meteor: An Automatic Metric for MT Evaluation with High Levels of Correlation with Human Judgments (2007)](https://www.cs.cmu.edu/~alavie/METEOR/pdf/Lavie-Agarwal-2007-METEOR.pdf)
 
 - Область применения: machine translation
 
-### Корреляция с человеческими оценками
+### Описание
+
+### Принцип работы
+
+- в BLEU подсчет n-gram служит как показатель корректности предложения с точки зрения грамматики. В Meteor авторы считаю что порядок слов важнее чем совпадение n-gram.
+- в BLEU основной упор делается на presicion, данная метрика также внедряет recall
+
+В METEOR мы имеем _специальный_ алгоритм word-matching, который подсчитывает совпадения uni-gram между переводом, который сгенерировала машина и референсом для этого перевода.
+
+Визуально это выглядит вот так
+
+![](./metrics/meteor/METEOR-alignment-a.png)
+
+#### Подсчет обычных совпадений слов (без использования стемминга или синонимов)
+
+```python
+# https://github.com/nltk/nltk/blob/a915791ad501d41dbb7e3c13c4877a734505eaab/nltk/translate/meteor_score.py#L78
+"""
+enum_hypothesis_list = [(0, 'it'), (1, 'is'), (2, 'a'), (3, 'guide'), (4, 'to'), (5, 'action'), (6, 'which'), (7, 'ensures'), (8, 'that'), (9, 'the'), (10, 'military'), (11, 'always'), (12, 'obeys'), (13, 'the'), ...]
+
+enum_reference_list = [(0, 'it'), (1, 'is'), (2, 'a'), (3, 'guide'), (4, 'to'), (5, 'action'), (6, 'that'), (7, 'ensures'), (8, 'that'), (9, 'the'), (10, 'military'), (11, 'will'), (12, 'forever'), (13, 'heed'), ...]
+"""
+
+word_match = []
+for i in range(len(enum_hypothesis_list))[::-1]:
+    for j in range(len(enum_reference_list))[::-1]:
+        if enum_hypothesis_list[i][1] == enum_reference_list[j][1]:
+            word_match.append(
+                (enum_hypothesis_list[i][0], enum_reference_list[j][0])
+            )
+            enum_hypothesis_list.pop(i)
+            enum_reference_list.pop(j)
+            break
+return word_match, enum_hypothesis_list, enum_reference_list
+```
+
+#### Подсчет чанков для референса и гипотезы
+
+```python
+"""
+Counts the fewest possible number of chunks such that matched unigrams
+of each chunk are adjacent to each other.
+matches = [
+  (0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (7, 7), (8, 8), (10, 10),
+  (14, 15),
+  (16, 9),
+  (17, 14)
+]
+"""
+i = 0
+chunks = 1
+while i < len(matches) - 1:
+    if (matches[i + 1][0] == matches[i][0] + 1) and (
+        matches[i + 1][1] == matches[i][1] + 1
+    ):
+        i += 1
+        continue
+    i += 1
+    chunks += 1
+return chunks
+# chunks=6
+```
+
+#### Формула вычисления meteor
+
+```python
+# https://github.com/nltk/nltk/blob/a915791ad501d41dbb7e3c13c4877a734505eaab/nltk/translate/meteor_score.py#L260
+precision = matches_count / translation_length
+recall = matches_count / reference_length
+fmean = (precision * recall) / (alpha * precision + (1 - alpha) * recall)
+
+frag_frac = chunk_count / matches_count
+penalty = gamma * frag_frac**beta
+# итоговый скор
+METEOR_2005 =  (1 - penalty) * fmean
+# METEOR 2004 has α = 0.9, β = 3.0 and γ = 0.5
+# METEOR 2005 has α = 0.9, β = 3.0 and γ = 0.5 (для конкретного языка данные параметры варьируются, подробнее в статье)
+```
+
+### Корреляция с человеческими оценками ([meteor_2004](https://aclanthology.org/W05-0909.pdf) )
 
 Для оценки корреляции авторы использовали датасет:
 
@@ -510,19 +589,115 @@ from nltk.translate.meteor_score import meteor_score
 hypothesis1 = "It is a guide to action which ensures that the military always obeys the commands of the party".split()
 reference1 = "It is a guide to action that ensures that the military will forever heed Party commands".split()
 
-print(round(meteor_score(
-  [reference1],
-  hypothesis1),
-  4
-))
+print(
+  meteor_score(
+    [reference1],
+    hypothesis1
+    ),
+)
 # 0.6944
 
-print(round(meteor_score([
-  ['this', 'is', 'a', 'cat']],
-	['non', 'matching', 'hypothesis']),
-    4
-))
+print(
+  meteor_score([
+    ['this', 'is', 'a', 'cat']],
+    ['non', 'matching', 'hypothesis']),
+)
 # 0.0
+```
+
+#### [Официальная имплементация meteor(2005)](https://www.cs.cmu.edu/~alavie/METEOR/index.html#Download)
+
+**Переходим в папку [metrics/meteor/meteor-1.0/meteor-compiled-1.0](metrics/meteor/meteor-1.0/meteor-compiled-1.0)**
+
+```xml
+<!-- my-ref.sgm-->
+<!-- это файл с референсами -->
+<refset trglang="en" setid="newstest2009" srclang="any">
+<doc sysid="ref" docid="ihned.cz/2008/09/30/36776" genre="news" origlang="cz">
+<hl>
+<seg id="1"> It is a guide to action that ensures that the military will forever heed Party commands </seg>
+</hl>
+</doc>
+</refset>
+```
+
+```xml
+<!-- my-test.sgm -->
+<!-- файл со сгенеренными переводами -->
+
+<tstset trglang="en" setid="newstest2009" srclang="any">
+<doc sysid="cmu-combo" docid="ihned.cz/2008/09/30/36776" genre="news" origlang="cz">
+<hl>
+<seg id="1"> It is a guide to action which ensures that the military always obeys the commands of the party </seg>
+</hl>
+</doc>
+</tstset>
+```
+
+```bash
+java -jar meteor.jar example/my-test.sgm example/my-ref.sgm -sgml -p "0.9 3.0 0.5"
+```
+
+```console
+Test words:             18
+Reference words:        16
+Chunks:                 5
+Precision:              0.7222222222222222
+Recall:                 0.8125
+f1:                     0.7647058823529411
+fMean:                  0.8024691358024691
+Fragmentation penalty:  0.02844788347746928
+
+Final score:            0.779640587332895
+```
+
+**И снова результат отличается от другой реализации**
+
+Понятно что данные и скрипты которые вычисляли корреляцию авторы тоже не положили.
+
+#### [Официальная имплементация meteor(2014)](http://www.cs.cmu.edu/~alavie/METEOR/index.html#Download)
+
+- файлы перевода и референсов остались неизменными
+- данная реализация сильно отличается от версии 1.0, поэтому их даже сравнивать некорректно
+
+**переходим в папку [metrics/meteor/meteor-1.5](metrics/meteor/meteor-1.5)**
+
+```bash
+java -Xmx2G -jar  meteor-1.5.jar example/my-test.sgm example/my-ref.sgm -sgml  -p "0.9 3.0 0.5 0.7"
+```
+
+```console
+Meteor version: 1.5
+
+Eval ID:        meteor-1.5-wo-en-no_norm-0.9_3.0_0.5_0.7-ex_st_sy_pa-1.0_1.0_0.6_0.8
+
+Language:       English
+Format:         SGML
+Task:           Custom
+Modules:        exact stem synonym paraphrase
+Weights:        1.0 1.0 0.6 0.8
+Parameters:     0.9 3.0 0.5 0.7
+
+[newstest2009][cmu-combo]
+
+           Test Matches                  Reference Matches
+Stage      Content  Function    Total    Content  Function    Total
+1                4         6       10          4         6       10
+2                0         0        0          0         0        0
+3                0         0        0          0         0        0
+4                2         1        3          2         2        4
+Total            6         7       13          6         8       14
+
+Test words:             18
+Reference words:        16
+Chunks:                 2
+Precision:              0.6930232558139536
+Recall:                 0.7750000000000001
+f1:                     0.731722772277228
+fMean:                  0.7659398059862368
+Fragmentation penalty:  0.0016257684296093072
+
+Final score:            0.7646945652306834
 ```
 
 ## Cider. Consensus-based Image Description Evaluation

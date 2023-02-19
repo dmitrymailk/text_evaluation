@@ -1,0 +1,52 @@
+Requirements:
+------------
+
+To build METEOR:
+
+Java JDK 1.5 or above:
+http://java.sun.com/javase/downloads/index.jsp
+
+Apache Ant:
+http://ant.apache.org/
+
+To include TERp paraphrase information:
+
+Python 2.6:
+http://www.python.org/download/releases/2.6.2/
+
+
+Building METEOR:
+---------------
+
+METEOR can use portions of the TERp (http://www.umiacs.umd.edu/~snover/terp)
+paraphrase database to improve match recall.  This is required for the HTER task
+to work properly.  To include this functionality in a METEOR build, download the
+database (http://www.umiacs.umd.edu/~snover/terp/downloads/terp-pt.v1.tgz) and
+extract the files.  Use the create_paraphrase_file script to build the file used
+by METEOR.  Assuming the METEOR directory and database directory of terp-pt.v1
+are in the same parent diretory, run the following:
+
+$ cd meteor-*
+$ ./scripts/create_paraphrase_file.py . ../terp-pt.v1/unfiltered_phrasetable.txt
+
+When this is finished, run ant from the METEOR directory (containing the file
+"build.xml"):
+
+$ ant
+
+This will create a METEOR distribution in the "dist" directory including the
+METEOR jar file and documentation.  The distribution can be moved or copied to
+other systems.
+
+
+Testing the build:
+-----------------
+
+To test the METEOR source build, verify the that scores for an example
+test set match the included precalculated scores:
+
+$ cd dist/meteor-*
+$ java -jar meteor.jar example/test.sgm example/ref.sgm -sgml
+$ diff *seg.score example/*seg.score
+$ diff *doc.score example/*doc.score
+$ diff *sys.score example/*sys.score

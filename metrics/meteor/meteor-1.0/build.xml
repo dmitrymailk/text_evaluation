@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+
+<project name="Meteor" default="dist" basedir=".">
+
+    <property name="version" value="1.0"/>
+
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+    <property name="meteor-dir" location="${dist}/meteor-${version}"/>
+
+
+    <target name="init">
+        <mkdir dir="${build}"/>
+    </target>
+
+
+    <target name="compile" depends="init">
+        <javac source="1.6" target="1.6" srcdir="${src}" destdir="${build}"/>
+    </target>
+
+
+    <target name="dist" depends="compile">
+
+        <mkdir dir="${meteor-dir}"/>
+
+        <jar jarfile="${meteor-dir}/meteor.jar" basedir="${build}">
+            <fileset dir="resources"/>
+            <manifest>
+                <attribute name="Main-Class" value="Meteor"/>
+            </manifest>
+        </jar>
+
+        <copy todir="${meteor-dir}/doc">
+            <fileset dir="doc"/>
+        </copy>
+
+        <copy todir="${meteor-dir}/example">
+            <fileset dir="example"/>
+        </copy>
+
+        <copy todir="${meteor-dir}">
+            <fileset dir="${basedir}">
+                <include name="LICENSE"/>
+                <include name="README"/>
+            </fileset>
+        </copy>
+
+    </target>
+
+
+    <target name="clean" description="clean up generted files">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+</project>

@@ -1,0 +1,434 @@
+The METEOR MT Evaluation System, Version 1.0
+
+Michael Denkowski (mdenkows at cs dot cmu dot edu)
+Abhaya Agarwal (abhayaa at cs dot cmu dot edu)
+Satanjeev "Bano" Banerjee (satanjeev at cmu dot edu)
+Alon Lavie (alavie at cs dot cmu dot edu)
+
+Carnegie Mellon University
+Pittsburgh, PA, USA
+
+
+1. Introduction:
+================
+
+METEOR is a system that automatically evaluates the output of machine
+translation engines by comparing to them to one or more reference translations.
+For a given pair of a hypothesis and reference strings, the evaluation proceeds
+in a sequence of stages, with different criteria being used at each stage to
+find and score unigram matches. By default, at the first stage all exact matches
+are detected between the two strings. In the second stage, stem matches are
+detected using the Snowball stemmers. In the third stage, synonym matches are
+detected using synonym sets from the WordNet 3 database. An optional fourth
+stage detects matches according to a paraphrase database. METEOR 1.0 supports
+the TERp (http://www.umiacs.umd.edu/~snover/terp/) paraphrase database as a
+possible source.
+
+The system is written in pure Java with a full API to allow easy incorporation
+of METEOR scoring into existing systems. The sentence aligner can also function
+independently of scorer and thus be used in other systems that require
+monolingual sentence alignment.
+
+METEOR supports evaluation of MT outputs in languages other than English.
+Currently supported languages are French, German, Spanish and Czech. Details are
+provided in next section.
+
+METEOR also includes:
+- a standalone version of the Aligner
+- a standalone version of the Sufficient Statistics Scorer
+- a Trainer which can retune the METEOR parameters for new data
+
+
+2. Running METEOR: 
+==================
+
+This section refers to the standalone METEOR scorer. For information about
+building METOER, see the INSTALL file. For information about the METEOR API,
+see the JavaDoc in the doc directory.
+
+The following can be seen by running the METEOR scorer with no arguments:
+
+--------------------------------------------------------------------------------
+METEOR version 1.0
+Usage: java -jar meteor.jar <test> <reference> [options]
+
+Options:
+-l language                 One of: en cz de es fr
+-t task                     One of: af rank hter
+-p "alpha beta gamma"       Custom parameters (overrides default)
+-m "module1 module2 ..."    Specify modules (overrides default)
+                              One of: exact stem synonym paraphrase
+-w "weight1 weight2 ..."    Specify module weights (overrides default)
+-s systemID                 Not usually required
+-r refCount                 Number of references (plaintext only)
+-x maxComputations          Keep speed reasonable
+-d synonymDirectory         (if not default)
+-a paraphraseFile           (if not default)
+-j jobs                     Number of jobs to run (nBest only)
+-normalize                  Convert symbols and tokenize (plaintext input only)
+-sgml                       Input is in SGML format
+-nBest                      Input is in nBest format
+-keepPunctuation            Consider punctuation when aligning sentences
+-ssOut                      Output sufficient statistics instead of scores
+
+Default settings are stored in the meteor.properties file
+--------------------------------------------------------------------------------
+
+The simplest way to run the system is as follows: 
+
+$ java -jar meteor.jar <test file> <reference file>
+
+If your input is in SGML format, use:
+
+$ java -jar meteor.jar <test file> <reference file> -sgml
+
+For example, using the sample files included with this distribution,
+you can run the following: 
+
+$ java -jar meteor.jar example/test.sgm example/ref.sgm -sgml
+
+Score files for segment, document, and system level scores are produced,
+prefixed with the system name. The output from the above should match the
+example scores.
+
+
+3. Options: 
+===========
+
+Language: -l language
+---------------------
+
+English is assumed by default. METEOR also supports evaluation of MT output in
+the following languages:
+
+Language        Available Modules
+
+English	(en)    (exact, stem, synonym, paraphrase)
+Czech	(cz)    (exact)
+French	(fr)    (exact, stem)
+German	(de)    (exact, stem)
+Spanish	(es)    (exact, stem)
+
+
+Task: -t task
+-------------
+
+Each task specifies the modules, module weights, and parameters (alpha, beta,
+gamma) tuned to a specific type of human judgment data. These tasks and their
+parameters are listed below:
+
+af      Tuned to human judgments of adequacy and fluency. This task uses the
+        default module and parameter set from the meteor-0.7 system.
+        ------------------------------------------------------------------
+                    exact  stem  synonym  paraphrase    alpha  beta  gamma
+        English:    1.0    1.0   1.0      n/a           0.8    2.5   0.4
+        Czech:      1.0    n/a   n/a      n/a           0.8    0.83  0.28
+        French:     1.0    1.0   n/a      n/a           0.76   0.5   1.0
+        Spanish:    1.0    1.0   n/a      n/a           0.95   0.5   0.75
+        German:     1.0    1.0   n/a      n/a           0.95   1.0   0.98
+        ------------------------------------------------------------------
+        
+
+rank    Tuned to human rankings of translations. This task uses the module and
+        parameter set from the meteor-ranking system.
+        ------------------------------------------------------------------
+                    exact  stem  synonym  paraphrase    alpha  beta  gamma
+        English:    1.0    1.0   1.0      n/a           0.95   0.5   0.5
+        Czech:      1.0    n/a   n/a      n/a           0.95   0.5   0.45
+        French:     1.0    1.0   n/a      n/a           0.95   0.5   0.55
+        Spanish:    1.0    1.0   n/a      n/a           0.95   0.5   0.55
+        German:     1.0    1.0   n/a      n/a           0.9    3.0   0.15
+        ------------------------------------------------------------------
+
+hter    Tuned to HTER scores (TER scores between original MT hypotheses and
+        human-edited hypotheses). As of this release, training data is only
+        available for English.
+        ------------------------------------------------------------------
+                    exact  stem  synonym  paraphrase    alpha  beta  gamma
+        English:    1.0    1.0   1.0      1.0           0.65   1.8   0.45
+        ------------------------------------------------------------------
+
+Parameters: -p "alpha beta gamma"
+---------------------------------
+
+Alternatively, the three parameters (alpha, beta, gamma, discussed in the
+references METEOR papers) can be specified manually. This is most often used
+when tuning METEOR to new data.
+
+
+Modules: -m "module1 module2 ..."
+---------------------------------
+
+METEOR currently supports 4 modules:
+
+exact       matching using surface forms
+stem        matching using stems obtained from the included stemmers
+synonym     matching based on synonyms obtained from the included database
+paraphrase  matching based on paraphrases from a paraphrase database
+
+See the previous section to determine which modules to use for which languages.
+
+
+Module Weights: -w "weight1 weight2 ..."
+----------------------------------------
+
+The module weights can also be specified manually.  This is also primarily used
+for tuning METEOR.
+
+
+System ID: -s
+-------------
+
+This is the ID of the system to be evaluated. By default, the first system ID
+encountered in the test file is the one used for scoring. If the file contains
+the output of only one system, this option does not need to be used.
+
+
+Reference Count: -r
+-------------------
+
+If the input is in plaintext, the number of references can be specified. For N
+references, it is assumed that the reference file will be N times the length of
+the test file, containing sets of N references in order. For example, if N=4,
+reference lines 1-4 will correspond to test line 1, 5-8 to line 2, etc.
+
+
+Maximum Computations: -x
+------------------------
+
+This number, set to 10,000 by default, is used to limit the search depth for
+very long sentence pairs.
+
+
+Synonymy Directory: -d synonymDirectory
+---------------------------------------
+
+This option should only be used to test external synonymy databases. By default,
+the bundled synonymy database will be used.
+
+
+Paraphrase File: -a paraphraseFile
+----------------------------------
+
+This option should only be used to test external paraphrase databases. By
+default, the bundled paraphrase database will be used.
+
+
+Jobs: -j jobs
+-------------
+
+This option (nBest scoring only) sets the number of jobs to use for scoring. It
+is generally a good idea to set this to the number of CPUs on the machine
+running METEOR.
+
+
+Normalize: -normalize
+---------------------
+
+This is only used for plaintext (SGML is normalized automatically). This
+option tokenizes and lowercases the input lines, normalizes punctuation, and
+converts any remaining markup language tags to their plaintext forms.
+
+
+SGML: -sgml
+-----------
+
+This specifies that input is in SGML format. (See Input/Output section)
+
+
+N-Best: -nBest
+--------------
+
+This specifies that input is in nBest format with multiple translations for each
+segment. For each segment, a line containing a single number for the count of
+translations is followed by one translation per line. For example, an input file
+with translations for three segments might appear as follows:
+
+1
+This is a single translation.
+3
+This is hypothesis one.
+This is hypothesis two.
+This is hypothesis three.
+2
+This segment has two translations.
+This is the second translation.
+
+See Input/Output section for the output format.
+
+
+Keep Punctuation: -keepPunctuation
+----------------------------------
+
+If not specified, punctuation will be removed.  If specified, punctuation
+symbols will be treated as tokens by the matcher.
+
+
+Sufficient Statistics: -ssOut
+-----------------------------
+
+This option outputs sufficient statistics in place of scores and omits
+all other output.  The behavior is slightly different depending on
+the data format.
+
+Plaintext:
+
+Space delimited lines are output, each having the following form:
+
+tstLen refLen stage1tstTotalMatches stage1refTotalMatches
+stage1tstWeightedMatches stage1refWeightedMatches s2tTM s2rTM s2tWM
+s2rWM s3tTM s3rTM s3tWM s3rWM s4tTM s4rTM s4tWM s4rWM chunks lenCost
+
+No system level score is output. The lines can be piped or otherwise passed to
+the StatsScorer program to produce METEOR scores from the sufficient statistics.
+
+SGML:
+
+The output score files will contain space delimited sufficient statistics in
+place of scores. Segment, Document, and System level scores are still produced.
+
+
+4. Input/Output Format of METEOR:
+=================================
+
+Input can be in either plaintext with one segment per line (also see -r and
+-nBest for multiple references or hypotheses), or in SGML.
+
+For plaintext, output is to standard out with scores for each segment and final
+system level statistics.
+
+If nBest is specified, a score is output for each translation hypothesis along
+with system level statistics for first-sentence (first translation in each list)
+and best-choice (best scoring translation in each list).
+
+For SGML, output is in the 3 file score format which includes segment, document,
+and system level scores prefixed by the system name.  For system "example":
+
+example-seg.score contains lines: testset system document segment score
+example-doc.score contains lines: testset system document score
+example-sys.score contains line:  testset system score
+
+System level statistics will also be written to standard out for SGML scoring.
+
+
+5. Aligner:
+===========
+
+The METEOR aligner can be run independently with the following command:
+
+$ java -cp meteor.jar Matcher
+
+Without any arguments, the following help text is printed.
+
+--------------------------------------------------------------------------------
+METEOR Aligner version 1.0
+Usage: java -cp meteor.jar Matcher <test> <reference> [options]
+
+Options:
+-l language                 One of: en cz de es fr
+-m "module1 module2 ..."    Specify modules (overrides default)
+                              One of: exact stem synonym paraphrase
+-x maxComputations          Keep speed reasonable
+-d synonymDirectory         (if not default)
+-a paraphraseFile           (if not default)
+
+Default settings are stored in the matcher.properties file bundled in the JAR
+--------------------------------------------------------------------------------
+
+The aligner reads in two plaintext files and outputs a detailed line-by-line
+alignment between them.  Only the options (outlined in previous sections) which
+apply to the creation of alignments are available.
+
+
+6. StatsScorer:
+===============
+
+The METEOR sufficient statistics scorer can also be run independently:
+
+$ java -cp meteor.jar StatsScorer
+
+The --help switch provides the following help text.
+
+--------------------------------------------------------------------------------
+METEOR Stats Scorer version 1.0
+Usage: java -cp meteor.jar StatsScorer [options]
+
+Options:
+-l language			One of: en cz de es fr
+-t task				One of: af rank hter
+-p "alpha beta gamma"		Custom parameters (overrides default)
+-w "weight1 weight2 ..."	Specify module weights (overrides default)
+
+Default settings are stored in the statsscorer.properties file
+--------------------------------------------------------------------------------
+
+The scorer reads lines of succifient statistics from standard in and writes
+METEOR scores to standard out.
+
+
+7. Trainer:
+===============
+
+The METEOR trainer can be used to retune the parameters for new data.  The
+"scripts" directory contains particular scripts for creating training sets from
+different data formats.  
+
+Without any arguments, the following help text is printed.
+
+--------------------------------------------------------------------------------
+METEOR Trainer version 1.0
+Usage: java -cp meteor.jar Trainer <task> <dataDir> [options]
+
+Tasks:                       One of: hter
+
+Options:
+-i "p1 p2 p3 w1 w2 w3 w4"    Initial parameters and weights
+-f "p1 p2 p3 w1 w2 w3 w4"    Final parameters and weights
+-s "p1 p2 p3 w1 w2 w3 w4"    Steps
+--------------------------------------------------------------------------------
+
+The Trainer will explore the parameter space specified by the initial and final
+weights using the given steps.  For each set of parameters tested, the Pearson's
+length-weighted segment-level correlation coefficient is printed to standard
+out, along with the parameter values.
+
+
+8. Licensing:
+=============
+
+See the included LICENSE file for all license information.
+
+
+9. Acknowledgements:
+====================
+
+The following researchers have contributed to the implementation of
+the METEOR system (all at Carnegie Mellon University): 
+
+Rachel Reynolds
+Kenji Sagae
+Jeremy Naman
+Shyamsundar Jayaraman 
+
+We would also like to thank Greg Sanders (gregory dot sanders at nist dot gov) for tuning
+Adequacy parameters for Arabic
+
+10. References:
+==============
+[Lavie & Agarwal,2007] 2007, Lavie, A., A. Agarwal. "METEOR: An Automatic Metric for MT
+ Evaluation with High Levels of Correlation with Human Judgments",
+ To appear in Proceedings of Workshop on Statistical Machine Translation 
+ at the 45th Annual Meeting of the Association of Computational Linguistics (ACL-2007),
+ Prague, June 2007.
+
+[Banerjee & Lavie,2005] 2005,Banerjee, S. and A. Lavie, "METEOR: An Automatic Metric for MT
+ Evaluation with Improved Correlation with Human Judgments",
+ Proceedings of Workshop on Intrinsic and Extrinsic Evaluation Measures
+ for MT and/or Summarization at the 43th Annual Meeting of 
+ the Association of Computational Linguistics (ACL-2005), 
+ Ann Arbor, Michigan, June 2005.
+
+[Lavie et al, 2004] 2004, Lavie, A., K. Sagae and S. Jayaraman. "The Significance of Recall
+ in Automatic Metrics for MT Evaluation". In Proceedings of 
+ the 6th Conference of the Association for Machine Translation
+ in the Americas (AMTA-2004), Washington, DC, September 2004.
