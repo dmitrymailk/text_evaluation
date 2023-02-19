@@ -565,6 +565,10 @@ METEOR_2005 =  (1 - penalty) * fmean
 
 Также был проведен анализ корреляции(Pearson) между **индивидуальными** оценками METEOR и человеческими оценками одних и тех же предложений. По итогу в среднем для **Arabic Dataset** они получили **0.347**, а для **Chinese Dataset** **0.331**. Авторы также отмечают что в данных датасетах в некоторых местах низкий уровень согласия между людьми. В результате _нормализации_ этих оценок, корреляция стала **0.403** и **0.365**.
 
+#### [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
+
+В данной работе рассматривается корреляция качества генерации диалога и метрик. Показано что на датасетах Twitter Corpus и Ubuntu Dialogue Corpus корреляция(Spearman, Pearson) с метрикой METEOR(2005) составляет 0.1887, 0.1927 и 0.06314, 0.1419 соответственно. В общем очень низкая. Тогда как человеком который отмечал релевантность текста от 1 до 5 составила около 0.95.
+
 ### Пример использования
 
 ```python
@@ -963,3 +967,93 @@ print(bert_scores['f1'])
 ## [Learning Compact Reward for Image Captioning](https://arxiv.org/abs/2003.10925)
 
 - Область применения: image caption
+
+# Исследования про корреляцию метрик
+
+## [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
+
+## [A Comprehensive Assessment of Dialog Evaluation Metrics](https://arxiv.org/pdf/2106.03706v4.pdf)
+
+# Датасеты с оценками диалогов
+
+## FED dataset (fine-grained evaluation of dialog)
+
+- подробнее о создании в этой работе [Unsupervised Evaluation of Interactive Dialog with DialoGPT](https://aclanthology.org/2020.sigdial-1.28.pdf)
+- [DOWNLOAD DATASET](./datasets/FED/)
+
+### Пример из датасета
+
+Оценки которые тут представлены делали люди. Подробное описание каждого из направлений можно найти в публикации.
+
+```json
+{
+    "context": "User: Hi!\nSystem: Hey! How are you today?\nUser: good\nSystem: I'm glad to hear that! What are your plans for today?\nUser: I'm trying to find a good podcast to listen to\nSystem: What kinds of podcasts do you like?\nUser: only those about Marvel movies!\nSystem: Do you like Hollywood Babble-On?\nUser: i haven't tried it...do you like it?\nSystem: It's one of my favorites, right up there with REDACTED_TERM.\nUser: awesome! do you listen to a lot of podcasts?\nSystem: Not as much as I'd like, but I do like listening to NPR.\nUser: where do you listen to podcasts? Spotify?",
+    "response": "System: I listen to them through iTunes.",
+    "system": "Meena",
+    "annotations": {
+      "Interesting": [
+        2,
+        2,
+        0,
+        2,
+        2
+      ],
+      "Engaging": [
+        2,
+        2,
+        1,
+        2,
+        2
+      ],
+      "Specific": [
+        2,
+        2,
+        1,
+        2,
+        1
+      ],
+      "Relevant": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "Correct": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "Semantically appropriate": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "Understandable": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "Fluent": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "Overall": [
+        4,
+        4,
+        3,
+        3,
+        4
+      ]
+    }
+  },
+```
