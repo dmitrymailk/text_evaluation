@@ -165,6 +165,18 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 
 В данной работе рассматривается корреляция качества генерации диалога и метрик. Показано что на датасетах Twitter Corpus и Ubuntu Dialogue Corpus корреляция(Spearman, Pearson) с метрикой BLEU-4 составляет 0.3417, 0.1392 и 0.1218, 0.1132 соответсвенно. В общем очень низкая. Тогда как человеком который отмечал релевантность текста от 1 до 5 составила в среднем 0.95.
 
+#### [GODEL: Large-Scale Pre-Training for Goal-Directed Dialog](https://arxiv.org/pdf/2206.11309.pdf)
+
+На картинке ниже представленна inter-annotator agreement согласно Krippendorff’s alpha. Как мы можем заметить согласованность не превышает даже 0.5. Это свидетельствует о высоком уровне несогласованноти между разметчиками (кстати количество разметчиков не указывается в работе, что очень важно для подсчета данной формулы). Согласно книге [Klaus Krippendor Content Analysis An Introduction to Its Methodology](https://www.daneshnamehicsa.ir/userfiles/files/1/9-%20Content%20Analysis_%20An%20Introduction%20to%20Its%20Methodology.pdf), данные которые имеют уровень согласованности α < 0.667 не должны использованы в отчете, иными словами не являются валидными. Для справки -1 означает полную несогласованность между оценщиками, 1 - абсолютное согласие.
+
+Соответственно насколько стоит верить корелляции с BLEU и другими метриками вопрос конечно интересный.
+
+![](./metrics/godel/inner_agreement.png)
+
+Корреляция(spearman rank) с BLEU(из библиотеки evaluate)
+
+![](./metrics/godel/correlation.png)
+
 ### Модификации
 
 #### [sacreBLEU](https://github.com/mjpost/sacrebleu)
