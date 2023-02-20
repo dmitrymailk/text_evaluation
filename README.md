@@ -167,13 +167,13 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 
 #### [GODEL: Large-Scale Pre-Training for Goal-Directed Dialog](https://arxiv.org/pdf/2206.11309.pdf)
 
-На картинке ниже представленна inter-annotator agreement согласно Krippendorff’s alpha. Как мы можем заметить согласованность не превышает даже 0.5. Это свидетельствует о высоком уровне несогласованноти между разметчиками (кстати количество разметчиков не указывается в работе, что очень важно для подсчета данной формулы). Согласно книге [Klaus Krippendor Content Analysis An Introduction to Its Methodology](https://www.daneshnamehicsa.ir/userfiles/files/1/9-%20Content%20Analysis_%20An%20Introduction%20to%20Its%20Methodology.pdf), данные которые имеют уровень согласованности α < 0.667 не должны использованы в отчете, иными словами не являются валидными. Для справки -1 означает полную несогласованность между оценщиками, 1 - абсолютное согласие.
+На картинке ниже представленна inter-annotator agreement согласно Krippendorff’s alpha. Как мы можем заметить согласованность не превышает даже 0.5. Это свидетельствует о высоком уровне несогласованноти между разметчиками (кстати количество разметчиков не указывается в работе, что очень важно для подсчета данной формулы). Согласно книге [Klaus Krippendor Content Analysis An Introduction to Its Methodology](https://www.daneshnamehicsa.ir/userfiles/files/1/9-%20Content%20Analysis_%20An%20Introduction%20to%20Its%20Methodology.pdf), данные которые имеют уровень согласованности α < 0.667 не должны использованы в отчете, иными словами не являются валидными. Для справки 1 представляет полное согласие между оценщиками, 0 указывает на то, что они угадывают случайным образом, а -1 указывает на то, что оценщики систематически расходятся во мнениях. Подробнее с примерами можно [прочитать тут](https://www.surgehq.ai/blog/inter-rater-reliability-metrics-an-introduction-to-krippendorffs-alpha)
 
 Соответственно насколько стоит верить корелляции с BLEU и другими метриками вопрос конечно интересный.
 
 ![](./metrics/godel/inner_agreement.png)
 
-Корреляция(spearman rank) с BLEU(из библиотеки evaluate)
+Корреляция(spearman rank) с BLEU(из библиотеки evaluate). Более высокую корреляцию с Extrinsic авторы обосновывают более высоким уровнем согласия среди разметчиков.
 
 | Dataset             | Extrinsic | Intrinsic | Safety |
 | ------------------- | --------- | --------- | ------ |
