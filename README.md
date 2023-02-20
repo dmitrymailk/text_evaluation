@@ -175,7 +175,10 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 
 Корреляция(spearman rank) с BLEU(из библиотеки evaluate)
 
-![](./metrics/godel/correlation.png)
+| Dataset             | Extrinsic | Intrinsic | Safety |
+| ------------------- | --------- | --------- | ------ |
+| MultiWoz            | 0.217     | 0.142     | 0.132  |
+| Wizard of Wikipedia | 0.072     | -0.022    | 0.020  |
 
 ### Модификации
 
