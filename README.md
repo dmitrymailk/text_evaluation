@@ -191,47 +191,43 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 - данный пример показывает насколько все зависит от библиотеки, которую мы используем
 
 ```python
+import numpy as np
 import evaluate
 from nltk.translate.bleu_score import sentence_bleu
+from pycocoevalcap.bleu.bleu import Bleu
 
-candidate_1 = "It is a guide to action which ensures that the military always obeys the commands of the party."
-
-candidate_2 = "It is to insure the troops forever hearing the activity guidebook that party direct."
-
-reference_1 = "It is a guide to action that ensures that the military will forever heed Party commands."
-reference_2 = "It is the guiding principle which guarantees the military forces always being under the command of the Party."
-reference_3 = "It is the practical guide for the army always to heed the directions of the party."
-
+# returns geometric mean of n-gram precisions and brevity penalty
 bleu = evaluate.load("bleu")
 sacrebleu = evaluate.load("sacrebleu")
+pycoco_bleu = Bleu(4)
 
 references = [
-	[
-		reference_1,
-		reference_2,
-		reference_3
-	],
+    [
+        "It is a guide to action that ensures that the military will forever heed Party commands.",
+        "It is the guiding principle which guarantees the military forces always being under the command of the Party.",
+        "It is the practical guide for the army always to heed the directions of the party."
+    ],
 ]
 
 candidates = [
-	candidate_1,
-	candidate_2
+    "It is a guide to action which ensures that the military always obeys the commands of the party.",
+    "It is to insure the troops forever hearing the activity guidebook that party direct."
 ]
 print("bleu")
 for candidate in candidates:
-	bleu_score = bleu.compute(
-		predictions=[candidate],
-		references=references
-	)
-	print(bleu_score['bleu'])
+    bleu_score = bleu.compute(
+        predictions=[candidate],
+        references=references
+    )
+    print(bleu_score['bleu'])
 
 print("sacrebleu")
 for candidate in candidates:
-	bleu_score = sacrebleu.compute(
-		predictions=[candidate],
-		references=references
-	)
-	print(bleu_score['score'])
+    bleu_score = sacrebleu.compute(
+        predictions=[candidate],
+        references=references
+    )
+    print(bleu_score['score'])
 
 print("nltk bleu")
 for candidate in candidates:
@@ -240,6 +236,18 @@ for candidate in candidates:
     bleu_score = sentence_bleu(reference, candidate)
     print(bleu_score)
 
+
+print("pycoco_bleu")
+# использовалась в этой работе https://github.com/PaddlePaddle/Research/tree/master/NLP/Dialogue-PLATO
+# сравнение с прошлыми совсем некорректно, потому что неправильно просто усреднять
+# по все получившимся метрикам. приведено в качестве примера.
+for candidate in candidates:
+    score, scores = pycoco_bleu.compute_score(
+        {0: references[0]},
+        {0: [candidate]}
+    )
+    result = np.mean(score)
+    print(result)
 # bleu
 # 0.5401725898595141
 # 0.0
@@ -249,6 +257,9 @@ for candidate in candidates:
 # nltk bleu
 # 0.4969770530031034
 # 5.7264676266231995e-155
+# pycoco_bleu
+# 0.6801388372218287
+# 0.15086224370747625
 ```
 
 ### Ссылки
@@ -989,16 +1000,56 @@ print(bert_scores['f1'])
 
 ## [A Comprehensive Assessment of Dialog Evaluation Metrics](https://arxiv.org/pdf/2106.03706v4.pdf)
 
+1. Взяли кучу уже имеющихся метрик
+
+  <details>
+    <summary>Список использованных метрик</summary>
+
+![](./metrics/comprehensive_assessment_of_dialog/used_metrics.png)
+
+  </details>
+
+2. Взяли датасеты:
+
+- USR-TopicalChat,
+- USR-PersonaChat,
+- GRADE-ConvAI2,
+- GRADE-DailyDialog,
+- HolisticEval-DailyDialog,
+- PredictiveEngage-DailyDialog,
+- GRADE-EmpatheticDialogue (2019),
+- DSTC6 (2017) - данные взяты из twitter, более реалистичны и зашумлены
+- FED (2020a) - данные сгенерированны продвинутыми системами по типу Meena and Mitsuku, что
+- DSTC9 (2021) - данные были сгенерированы моделью [Plato](https://github.com/PaddlePaddle/Research/tree/master/NLP/Dialogue-PLATO) и DialoGPT
+
+![](./metrics/comprehensive_assessment_of_dialog/used_datasets.png)
+
+Данные датасеты были составлены по следующему принципу:
+
+- Берем диалоговый датасет.
+- Тренируем модель генерировать ответ на этих данных.
+- Генерируем реплики на test версиях этих датасетов
+- Собираем человеческие отзывы об этих репликах.
+
+3. Дотюнили некоторые метрики так как официально не было предоставлено никаких весов
+
+- RUBER, BERT-RUBER, PONE были натренированы на DailyDialog
+
 # Датасеты с оценками диалогов
 
 ## FED dataset (fine-grained evaluation of dialog)
 
-- подробнее о создании в этой работе [Unsupervised Evaluation of Interactive Dialog with DialoGPT](https://aclanthology.org/2020.sigdial-1.28.pdf)
 - [DOWNLOAD DATASET](./datasets/FED/)
+- подробнее [Unsupervised Evaluation of Interactive Dialog with DialoGPT](https://aclanthology.org/2020.sigdial-1.28.pdf)
+
+### Краткое описание
+
+Есть сгенерированные предложения от Meena и Mitsuku. Люди оценивали их от 1 до 5 по разным направлениям.
 
 ### Пример из датасета
 
-Оценки которые тут представлены делали люди. Подробное описание каждого из направлений можно найти в публикации.
+<details>
+<summary>Пример датасета</summary>
 
 ```json
 {
@@ -1072,3 +1123,159 @@ print(bert_scores['f1'])
     }
   },
 ```
+
+</details>
+
+## USR Persona Chat
+
+- [DOWNLOAD DATASET](./datasets/USRPersonaChat/)
+- подробнее [USR: An Unsupervised and Reference Free Evaluation Metric for DialogGeneration](https://arxiv.org/pdf/2005.00456.pdf)
+
+Разным языковым моделям и новому человеку давался контекст диалога. На основе него нужно было сгенерировать ответ. Потом были выставлены оценки генерации согласно разным направлениям.
+
+<details>
+  <summary>Пример датасета</summary>
+
+```json
+{
+  "context": "hi there how are you doing this evening ?\nhi , sitting here with my three dogs watching the olympics !\nnice i do not want to go back to work i am a waitress\ni love being in a polyamorous open relationship !\niol well i wish i was brave enough to do that\nmy father was a salesman , helps my dog walking business now\nthat is nice i've a motorbike don't know what car to get for winter\nvery very cool . sounds fun\nyes i had them put red with blue stripes to be shinny for when racing\nso is my dog , wow so cool\nso what do you do in your spare time ?\nlead singer for a band , music teacher\nwow nice are you really good ?\nmillions of plays on soundcloud\nreally would you share or are you shy\n",
+  "fact": "your persona: i also have a dog walking business.\nyour persona: i've three dogs.\nyour persona: my father was a door to door salesman.\nyour persona: i am in an open polyamorous relationship.\nyour persona: i like to watch the olympics.\n",
+  "annotators": ["shikib", "maxine", "mckenna"],
+  "responses": [
+    {
+      "response": "ha ha i'm so shy\n",
+      "model": "Original Ground Truth",
+      "Understandable": [1, 1, 1],
+      "Natural": [3, 3, 3],
+      "Maintains Context": [3, 3, 3],
+      "Engaging": [1, 2, 1],
+      "Uses Knowledge": [0, 0, 0],
+      "Overall": [3, 4, 4]
+    },
+    {
+      "response": "i know what you mean spend most nights cuddling my dog and star watching\n",
+      "model": "KV-MemNN",
+      "Understandable": [1, 1, 1],
+      "Natural": [3, 3, 3],
+      "Maintains Context": [1, 1, 1],
+      "Engaging": [3, 3, 3],
+      "Uses Knowledge": [1, 0, 1],
+      "Overall": [2, 2, 2]
+    },
+    {
+      "response": "i am a little shy but i am a little shy\n",
+      "model": "Seq2Seq",
+      "Understandable": [1, 1, 1],
+      "Natural": [2, 1, 2],
+      "Maintains Context": [3, 3, 3],
+      "Engaging": [1, 2, 2],
+      "Uses Knowledge": [0, 0, 0],
+      "Overall": [3, 3, 3]
+    },
+    {
+      "response": "i am not . i am a student .\n",
+      "model": "Language Model",
+      "Understandable": [0, 0, 1],
+      "Natural": [2, 2, 3],
+      "Maintains Context": [1, 1, 1],
+      "Engaging": [1, 2, 2],
+      "Uses Knowledge": [0, 0, 0],
+      "Overall": [2, 2, 2]
+    },
+    {
+      "response": "i only feel comfortable sharing my music with my dogs !\n",
+      "model": "New Human Generated",
+      "Understandable": [1, 1, 1],
+      "Natural": [3, 3, 3],
+      "Maintains Context": [3, 3, 3],
+      "Engaging": [3, 3, 3],
+      "Uses Knowledge": [1, 1, 1],
+      "Overall": [5, 5, 5]
+    }
+  ]
+}
+```
+
+</details>
+
+## USR Topical Chat
+
+- [DOWNLOAD DATASET](./datasets/USRTopicalChat/)
+- подробнее [USR: An Unsupervised and Reference Free Evaluation Metric for DialogGeneration](https://arxiv.org/pdf/2005.00456.pdf)
+
+Разным языковым моделям и новому человеку давался контекст диалога. На основе него нужно было сгенерировать ответ. Потом были выставлены оценки генерации согласно разным направлениям.
+
+<details>
+  <summary>Пример датасета</summary>
+
+```json
+{
+  "context": "so , i 'm reading the latest film from studio ghibli is out the tale of princess kaguya . dunno if you 're familiar with them , but studio ghibli has made a lot of great animated films , like spirited away , and princess mononoke \n i do n't think i have heard of them . i have heard that one of the directors recently passed away , and his last film was nominated for an academy award \n yeah , sadly , disney ( which owns the american rights to the films ) does n't tend to promote them very much . i think they 're worried they 'll cut into their \" home grown \" market . anyway , dunno if you even like animated movies , but they 're worth checking out . \n i do n't watch them very often . apparently there was a showing of the recent film in a park in d.c . that 's one u.s . city i have n't been to \n sadly , i have n't been to dc either , although i 've always wanted to visit there . apparently there 's a lot of interesting going down this summer . they 're having a crab feast at the navy - marine corps stadium . they 'll have 100 gallons of crab soup ! can you imagine that much soup ? \n\n",
+  "fact": "from left , emma baker , daniel saperstein and taylor mulitz of flasher will perform this summer 's final fort reno concert . ( jared soares for the washington post ) monday , july 30 25th birthday celebration at national postal museum : celebrate 25 years of this institution devoted to the long history of the u.s . postal service with daytime festivities that include cupcakes , birthday postcards , a photo booth and a special scavenger hunt with prizes . 11 a.m. to 2 p.m. free . tuesday , july 31 \" the color purple \" at kennedy center : the tony award - winning musical revival , based on the pulitzer prize - winning alice walker novel of the same name , features jazz , ragtime , gospel and blues with a story about an african american woman named celie surviving poverty in the south during the 1930s . through aug . 26 . $ 69-$149 . ask a harry potter scholar at southeast neighborhood library : come to this talk from tolanda henderson , a librarian from george washington university , who has used the j.k . rowling book series as a text in academia . commune with other muggles who prove that it 's not just kids and young adults who obsess about the boy who lived . 7 p.m. free . wednesday , aug . 1 rico nasty at the fillmore silver spring : two summers ago , rico nasty was a teenage loudmouth from the maryland suburbs , generating buzz on youtube for spitting surly , rainbow - tinted rhymes . now , after signing a deal with atlantic records , the 21-year - old singer is on her way to becoming one of the brightest voices in rap music .\n",
+  "annotators": ["sm", "me", "er"],
+  "responses": [
+    {
+      "response": "i recently met a girl who lives in that area , and she said the nightlife is worth visiting for . it sounds like many of the events feature jazz music . do you listen to jazz very often ? \n",
+      "model": "Original Ground Truth",
+      "Understandable": [1, 1, 1],
+      "Natural": [3, 3, 3],
+      "Maintains Context": [3, 3, 1],
+      "Engaging": [3, 3, 3],
+      "Uses Knowledge": [1, 1, 0],
+      "Overall": [5, 5, 4]
+    },
+    {
+      "response": "i think it 's interesting that peter gabriel has been in the us , he is a great performer .\n",
+      "model": "Argmax Decoding",
+      "Understandable": [1, 0, 1],
+      "Natural": [3, 3, 3],
+      "Maintains Context": [1, 1, 1],
+      "Engaging": [3, 2, 2],
+      "Uses Knowledge": [0, 0, 0],
+      "Overall": [4, 3, 3]
+    },
+    {
+      "response": "i have n't but i have heard that a lady gaga has a white blood drive . i think it 's interesting that the president of spotify has a jazz concert .\n",
+      "model": "Nucleus Decoding (p = 0.3)",
+      "Understandable": [1, 0, 0],
+      "Natural": [2, 2, 3],
+      "Maintains Context": [2, 2, 1],
+      "Engaging": [3, 3, 2],
+      "Uses Knowledge": [0, 0, 0],
+      "Overall": [3, 3, 2]
+    },
+    {
+      "response": "i 'm not sure . i 've heard of tommy orange 's debut .\n",
+      "model": "Nucleus Decoding (p = 0.5)",
+      "Understandable": [1, 1, 0],
+      "Natural": [3, 2, 2],
+      "Maintains Context": [2, 1, 1],
+      "Engaging": [1, 1, 2],
+      "Uses Knowledge": [0, 0, 0],
+      "Overall": [3, 2, 1]
+    },
+    {
+      "response": "yes , i think it was a great show , you should check it out and get it up . have you ever listened to ella fitzgerald ?\n",
+      "model": "Nucleus Decoding (p = 0.7)",
+      "Understandable": [1, 0, 0],
+      "Natural": [3, 3, 3],
+      "Maintains Context": [2, 1, 1],
+      "Engaging": [3, 2, 2],
+      "Uses Knowledge": [0, 0, 0],
+      "Overall": [4, 2, 3]
+    },
+    {
+      "response": "wow that 's a lot of soup . are you talking about the fort - reno concert ? i heard flasher will perform there ",
+      "model": "New Human Generated",
+      "Understandable": [1, 1, 1],
+      "Natural": [3, 3, 3],
+      "Maintains Context": [3, 3, 2],
+      "Engaging": [3, 3, 2],
+      "Uses Knowledge": [1, 1, 0],
+      "Overall": [5, 5, 4]
+    }
+  ]
+}
+```
+
+</details>
