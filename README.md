@@ -48,13 +48,22 @@
 
 # Correlation
 
-## Spearman Correlation
+## Correlation
 
-- эта корреляция говорит о монотонной зависимости 2 переменных. если одна увеличивается, другая тоже(или уменьшается). или одна уменьшается, другая увеличивается(или уменьшается)
+### Spearman
+
+- эта корреляция говорит о монотонной зависимости 2 переменных. если одна увеличивается, другая тоже(или уменьшается). или одна уменьшается, другая увеличивается(или уменьшается).
 - p-value означает вероятность того что заявленная корреляция будет такая же или больше
 - https://youtu.be/JwNwbu-g2m0
 
-## Pearson Correlation
+### Pearson
+
+- говорит от линейной зависимости 2 переменных
+
+### [Spearman vs Pearson]
+
+- [Clearly explained: Pearson V/S Spearman Correlation Coefficient](https://towardsdatascience.com/clearly-explained-pearson-v-s-spearman-correlation-coefficient-ada2f473b8)
+- [Pearson correlation vs. Spearman correlation methods](https://www.surveymonkey.com/market-research/resources/pearson-correlation-vs-spearman-correlation/)
 
 # n-gram Overlap Metrics for Content Selection
 
@@ -165,13 +174,29 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 
 В данной работе рассматривается корреляция качества генерации диалога и метрик. Показано что на датасетах Twitter Corpus и Ubuntu Dialogue Corpus корреляция(Spearman, Pearson) с метрикой BLEU-4 составляет 0.3417, 0.1392 и 0.1218, 0.1132 соответсвенно. В общем очень низкая. Тогда как человеком который отмечал релевантность текста от 1 до 5 составила в среднем 0.95.
 
+#### [Towards an Automatic Turing Test: Learning to Evaluate Dialogue Responses](https://aclanthology.org/P17-1103.pdf)
+
+Использовался смешанный датасет Twitter Corpus и Ubuntu Dialogue Corpus, по итогу всего было размечено 4104 примеров. Cohen's kappa = 0.63
+
+<details>
+  <summary>Табличка с корреляцией</summary>
+  
+  ![](./metrics/ADAM/correlation.png)
+</details>
+
+По итогу на их датасете корреляция (Spearman) с BLEU-4(pycocoevalcap)=0.051, c BLEU-2(pycocoevalcap)=0.039.
+
 #### [GODEL: Large-Scale Pre-Training for Goal-Directed Dialog](https://arxiv.org/pdf/2206.11309.pdf)
 
 На картинке ниже представленна inter-annotator agreement согласно Krippendorff’s alpha. Как мы можем заметить согласованность не превышает даже 0.5. Это свидетельствует о высоком уровне несогласованноти между разметчиками (кстати количество разметчиков не указывается в работе, что очень важно для подсчета данной формулы). Согласно книге [Klaus Krippendor Content Analysis An Introduction to Its Methodology](https://www.daneshnamehicsa.ir/userfiles/files/1/9-%20Content%20Analysis_%20An%20Introduction%20to%20Its%20Methodology.pdf), данные которые имеют уровень согласованности α < 0.667 не должны использованы в отчете, иными словами не являются валидными. Для справки 1 представляет полное согласие между оценщиками, 0 указывает на то, что они угадывают случайным образом, а -1 указывает на то, что оценщики систематически расходятся во мнениях. Подробнее с примерами можно [прочитать тут](https://www.surgehq.ai/blog/inter-rater-reliability-metrics-an-introduction-to-krippendorffs-alpha)
 
-Соответственно насколько стоит верить корелляции с BLEU и другими метриками вопрос конечно интересный.
+Соответственно насколько стоит верить корелляции с BLEU и другими метриками вопрос конечно открытый.
 
-![](./metrics/godel/inner_agreement.png)
+<details>
+  <summary>Inter-annotator agreement согласно Krippendorff’s alpha.</summary>
+  
+  ![](./metrics/godel/inner_agreement.png)
+</details>
 
 Корреляция(spearman rank) с BLEU(из библиотеки evaluate). Более высокую корреляцию с Extrinsic авторы обосновывают более высоким уровнем согласия среди разметчиков.
 
@@ -179,6 +204,31 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 | ------------------- | --------- | --------- | ------ |
 | MultiWoz            | 0.217     | 0.142     | 0.132  |
 | Wizard of Wikipedia | 0.072     | -0.022    | 0.020  |
+
+#### [USR: An Unsupervised and Reference Free Evaluation Metric for Dialog Generation](https://arxiv.org/pdf/2005.00456.pdf)
+
+<details>
+  <summary>Inter-annotator agreement для Topical-Chat, PersonaChat.</summary>
+
+![](./metrics/USR/inner_anotator_agreement.png)
+
+</details>
+
+<details>
+  <summary>Turn-level корреляция для Topical-Chat</summary>
+
+![](./metrics/USR/topical_chat_turn_level_correlation.png)
+
+</details>
+
+<details>
+  <summary>Turn-level корреляция для PersonaChat</summary>
+
+![](./metrics/USR/persona_chat_turn_level_correlation.png)
+
+</details>
+
+Корреляция с Overall Quality. Как видно в лучшем случае на Topical-Chat корреляция (Spearman) 0.2862 лучше всего с BLEU-2 . А на PersonaChat корреляция (Spearman) 0.1353 лучше всего с BLEU-4.
 
 ### Модификации
 
@@ -393,6 +443,43 @@ Y1 справляется с саммаризацией лучше чем Y2, п
 
 В данной работе рассматривается корреляция качества генерации диалога и метрик. Показано что на датасетах Twitter Corpus и Ubuntu Dialogue Corpus корреляция(Spearman, Pearson) с метрикой ROUGE-L составляет 0.1235, 0.09714 и 0.05405, 0.06401 соответственно. В общем очень низкая. Тогда как человеком который отмечал релевантность текста от 1 до 5 составила около 0.95.
 
+#### [Towards an Automatic Turing Test: Learning to Evaluate Dialogue Responses](https://aclanthology.org/P17-1103.pdf)
+
+Использовался смешанный датасет Twitter Corpus и Ubuntu Dialogue Corpus, по итогу всего было размечено 4104 примеров. Cohen's kappa = 0.63
+
+<details>
+  <summary>Табличка с корреляцией</summary>
+  
+  ![](./metrics/ADAM/correlation.png)
+</details>
+
+По итогу на их датасете корреляция (Spearman) с ROUGE(pycocoevalcap)=0.062.
+
+#### [USR: An Unsupervised and Reference Free Evaluation Metric for Dialog Generation](https://arxiv.org/pdf/2005.00456.pdf)
+
+<details>
+  <summary>Inter-annotator agreement для Topical-Chat, PersonaChat.</summary>
+
+![](./metrics/USR/inner_anotator_agreement.png)
+
+</details>
+
+<details>
+  <summary>Turn-level корреляция для Topical-Chat</summary>
+
+![](./metrics/USR/topical_chat_turn_level_correlation.png)
+
+</details>
+
+<details>
+  <summary>Turn-level корреляция для PersonaChat</summary>
+
+![](./metrics/USR/persona_chat_turn_level_correlation.png)
+
+</details>
+
+Корреляция с Overall Quality. На Topical-Chat корреляция (Spearman) с ROUGE-L=0.2745. На PersonaChat корреляция (Spearman) с ROUGE-L=0.0659.
+
 ### Пример использования
 
 ```python
@@ -594,6 +681,43 @@ METEOR_2005 =  (1 - penalty) * fmean
 #### [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
 
 В данной работе рассматривается корреляция качества генерации диалога и метрик. Показано что на датасетах Twitter Corpus и Ubuntu Dialogue Corpus корреляция(Spearman, Pearson) с метрикой METEOR(2005) составляет 0.1887, 0.1927 и 0.06314, 0.1419 соответственно. В общем очень низкая. Тогда как человеком который отмечал релевантность текста от 1 до 5 составила около 0.95.
+
+#### [Towards an Automatic Turing Test: Learning to Evaluate Dialogue Responses](https://aclanthology.org/P17-1103.pdf)
+
+Использовался смешанный датасет Twitter Corpus и Ubuntu Dialogue Corpus, по итогу всего было размечено 4104 примеров. Cohen's kappa = 0.63
+
+<details>
+  <summary>Табличка с корреляцией</summary>
+  
+  ![](./metrics/ADAM/correlation.png)
+</details>
+
+По итогу на их датасете корреляция (Spearman) с METEOR(pycocoevalcap)=0.021.
+
+#### [USR: An Unsupervised and Reference Free Evaluation Metric for Dialog Generation](https://arxiv.org/pdf/2005.00456.pdf)
+
+<details>
+  <summary>Inter-annotator agreement для Topical-Chat, PersonaChat.</summary>
+
+![](./metrics/USR/inner_anotator_agreement.png)
+
+</details>
+
+<details>
+  <summary>Turn-level корреляция для Topical-Chat</summary>
+
+![](./metrics/USR/topical_chat_turn_level_correlation.png)
+
+</details>
+
+<details>
+  <summary>Turn-level корреляция для PersonaChat</summary>
+
+![](./metrics/USR/persona_chat_turn_level_correlation.png)
+
+</details>
+
+Корреляция с Overall Quality. На Topical-Chat корреляция (Spearman) с METEOR=0.3365. На PersonaChat корреляция (Spearman) с METEOR=0.2527.
 
 ### Пример использования
 
@@ -1031,9 +1155,40 @@ print(bert_scores['f1'])
 - Генерируем реплики на test версиях этих датасетов
 - Собираем человеческие отзывы об этих репликах.
 
-3. Дотюнили некоторые метрики так как официально не было предоставлено никаких весов
+3. Посчитали корреляцию на разных датасетах
 
-- RUBER, BERT-RUBER, PONE были натренированы на DailyDialog
+везде далее я буду писать только Spearman correlation на turn-level.
+
+Список лучших метрик по корреляции:
+
+- USR-TopicalChat - USR=0.423
+- USR-PersonaChat - USL-H=0.523
+- GRADE-ConvAI2 - GRADE=0.571
+- GRADE-DailyDialog - DEB=0.363
+- GRADE-EmpatheticDialogue - DEB=0.395
+- DSTC6 - BERTScore=0.337
+- PE-DailyDialog - USL-H=0.699
+- FED - DynaEval=0.323
+
+Также авторы попробовали совместить результаты нескольких метрик. В данной работе они просто усредняли значения по каждой из модели. По итогу лучше всех показало себя усреднение всех метрик: PredictiveEngage+RUBER+PONE+USR+GRADE+USL-H+DEB.
+
+<details>
+<summary>Таблица с корреляциями</summary>
+
+![](./metrics/comprehensive_assessment_of_dialog/combine_metrics.png)
+
+</details>
+
+### Выводы
+
+- USR, GRADE, DEB, and USL-H для оценки генерации реплик (turn-level). Их результаты в общем выше чем у всех остальных.
+- Большинство метрик показывает лучшие результаты на тех датасетах, на которых они тренировались, это свидетельствует о некотором overfitting метрик под конкретные датасеты и типы данных.
+- результаты метрик начинают деградировать с увеличением длины контекста(это замечено в основном на BERT-based моделях), с GPT-2 дела обстоят несколько лучше
+- Комбинирование метрик дает более лучшие и устойчивые результаты
+
+От себя:
+
+- ничего не сказано про inner-annotator agreement, так как если в датасете низкая согласованность, то в нем сложно будет найти какие-то зависимости, так как данные будут противоречить самим себе. Хороший пример такого это работа [GODEL: Large-Scale Pre-Training for Goal-Directed Dialog](https://arxiv.org/pdf/2206.11309.pdf).
 
 # Датасеты с оценками диалогов
 
