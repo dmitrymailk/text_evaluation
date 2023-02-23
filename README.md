@@ -1118,6 +1118,58 @@ print(bert_scores['f1'])
 
 - Область применения: image caption
 
+## [USR: An Unsupervised and Reference Free Evaluation Metric for Dialog Generation](https://aclanthology.org/2020.acl-main.64.pdf)
+
+- Область применения: dialogue evaluation
+
+### Описание
+
+Метрика для оценки диалога на turn level. Данная метрика a reference-free, то есть ей не нужны ответы как с BLEU для оценки диалога.
+
+### Принцип работы
+
+#### Детали реализации
+
+Взяли 2 датасета: Topical-Chat и PersonaChat. Из test части 2 датасетов взяли выборку 60 диалогов. Для Topical-Chat обучили трансформер и сгенерировали с помощью него ответы с разными параметрами семплирования p = {0.3, 0.5, 0.7}. Для PersonaChat взяли предобученные (Seq2Seq), LSTM language model (LM) и Key-Value Profile Memory Network (KV-MemNN), из ParlAI. Также для каждого из датасета были сгенерированы новые ответы человеком. В итоге получилось примеров 360 на Topical-Chat и 300 на PersonaChat.
+
+Потом 2 этих датасета разметили по следующим направлениям: Understandable (0-1), Natural (1-3), Maintains Context (1-3), Interesting (1-3), Uses Knowledge (0-1), Overall Quality (1-5). Для каждого направления разметчикам давалось подробное описание с примерами(можно найти в работе). Overall Quality это общая оценка диалога разметчиком.
+
+Далее была взята модель RoBERTa и дообучена на Topical-Chat на задаче masked language modelling (MLM). Такая тренировка позволила идендифицировать некорректные или ненануральные ответы(направления Understandable, Natural).
+
+USR-MLM метрика считается следующим образом. Мы конкатенируем контекст и ответ. Потом поочереди маскируем каждое слово в ответе и получаем для него log likelihood. Итоговое значение метрики это отрицательная сумма log likelihood.
+
+<details>
+  <summary>Визуализация подсчета метрики USR-MLM</summary>
+
+![](./metrics/USR/usr-mlm.png)
+
+</details>
+
+Также была натренирована метрика USR-DR. Она предсказывает значения от 0 до 1 на основе контекста и ответа. Во время тренировки ей на вход подавались пары (контекст, реальный ответ) и (контекст, рандомно семплированный ответ из датасета). Данная метрика подходит для направлений: Maintains Context, Interesting and Uses Knowledge.
+
+Итоговая USR метрика явялется комбинацией всех 5 направлений и показывает высокую корреляцию с направлением Overall Quality. Тогда как отдельно USR-MLM и USR-DR показывают корреляцию ниже и сильно варьируются от датасетов.
+
+<details>
+  <summary>Корреляция по отдельным направлениям и метрикам</summary>
+
+![](./metrics/USR/table3table4.png)
+
+</details>
+
+<details>
+  <summary>Корреляция на Overall Quality на TopicalChat </summary>
+
+![](./metrics/USR/topical_chat_turn_level_correlation.png)
+
+</details>
+
+<details>
+  <summary>Корреляция на Overall Quality на PersonaChat </summary>
+
+![](./metrics/USR/persona_chat_turn_level_correlation.png)
+
+</details>
+
 # Исследования про корреляцию метрик
 
 ## [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
