@@ -1176,6 +1176,8 @@ USR-MLM метрика считается следующим образом. М�
 
 ## [A Comprehensive Assessment of Dialog Evaluation Metrics](https://arxiv.org/pdf/2106.03706v4.pdf)
 
+- https://github.com/exe1023/DialEvalMetrics
+
 1. Взяли кучу уже имеющихся метрик
 
   <details>

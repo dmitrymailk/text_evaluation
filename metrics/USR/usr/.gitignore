@@ -138,3 +138,6 @@ serialization_dir
 
 # emacs
 *.*~
+examples/uk
+examples/roberta_ft
+examples/ctx
