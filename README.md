@@ -1024,9 +1024,57 @@ depth.
 
 ### Пример использования
 
-```python
-# исходный код слишком ужасен
-# необходима полная переработка для широкого использования
+I have file `fed-small.txt` in `/data/dev`
+**fed-small.txt**
+
+```txt
+original	Hi!|||Hi! What's up?|||Nothing much, how about you|||Not much either.|||What are you doing|||Playing Terraria. What about you?|||Sitting in a meeting|||What kind of meeting?|||Can't say|||It's probably boring, isn't it?|||Haha, yes!|||What is the meeting about?|||I cannot tell you|||What can you tell me?	Hi!|||Hi! What's up?|||Nothing much, how about you|||Not much either.|||What are you doing|||Playing Terraria. What about you?|||Sitting in a meeting|||What kind of dog?|||Can't say|||It's probably boring, isn't it?|||Haha, yes!|||What is the meeting about?|||I hate|||I don't know
+original	Hi!|||Hey! How are you today?|||good|||I'm glad to hear that! What are your plans for today?|||I'm trying to find a good podcast to listen to|||What kinds of podcasts do you like?|||only those about Marvel corn!|||Do you like Hollywood Babble-Off?|||i haven't tried it...do you like it?|||It's two of my favorites, right up there with REDACTED_TERM.|||awesome! do you listen to a lot of birds?|||Not as much as I'd like, but I do like listening to NPR.|||where do you listen to podcasts? Spotify?|||I listen to them through iTunes.|||i like Spotify better...more options|||Yeah, I just don't has a money for Spotify.	Hi!|||Hey! How are you today?|||good|||I'm glad to hear that! What are your plans for today?|||I'm trying to find a good podcast to listen to|||What kinds of podcasts do you like?|||only those about Marvel movies!|||Do you like Hollywood Babble-On?|||i haven't tried it...do you like it?|||It's one of my favorites, right up there with REDACTED_TERM.|||awesome! do you listen to a lot of podcasts?|||Not as much as I'd like, but I do like listening to NPR.|||where do you listen to podcasts? Spotify?|||I listen to them through iTunes.|||i like Spotify better...more options|||Yeah, I just don't have the money for Spotify.
+```
+
+I executed script `bash scripts/eval/multitask_inference/eval_multi_head_dailydialog.sh`
+**eval_multi_head_dailydialog.sh**
+
+```bash
+export CUDA_VISIBLE_DEVICES=0
+export dataset=dailydialog
+
+for seed in 234567; do
+    python run.py \
+        --parallel \
+        --multi_head \
+        --eval_on fed-small \
+        --train_on ${dataset}_coherence ${dataset}_likeable ${dataset}_nli \
+        --load_from "output/train/multitask_base_${dataset}_${seed}" \
+        --output_dir "output/my_prediction_${dataset}_${seed}" \
+        --model_name_or_path "roberta_full_base" \
+        --criterion loss --seed ${seed};
+done
+```
+
+and I got these files
+**expert_predictions.fed-small.end.json**
+
+```json
+[
+  [
+    [0.3812446594238281, 0.19450366497039795, 0.09418931603431702],
+    [0.1512472778558731, 0.19958867132663727, 0.09207701683044434]
+  ],
+  [
+    [0.6565149426460266, 0.7325885891914368, 0.4197925925254822],
+    [0.632584273815155, 0.7850334048271179, 0.39918893575668335]
+  ]
+]
+```
+
+**predictions.fed-small.end.json**
+
+```json
+[
+  [0.22331254184246063, 0.14763765037059784],
+  [0.6029653549194336, 0.6056022047996521]
+]
 ```
 
 ### Ссылки
@@ -1169,6 +1217,71 @@ USR-MLM метрика считается следующим образом. М�
 ![](./metrics/USR/persona_chat_turn_level_correlation.png)
 
 </details>
+
+### Пример использования
+
+```python
+# отсутствует описание функций и их документация, не указаны версии пакетов, в итоге ничего не работает.
+```
+
+## [Deconstruct to Reconstruct a Configurable Evaluation Metric for Open-Domain Dialogue Systems (USL-H metric)](https://aclanthology.org/2020.coling-main.368.pdf)
+
+- Область применения: dialogue evaluation
+- https://github.com/vitouphy/usl_dialogue_metric
+
+### Принцип работы
+
+#### Детали реализации
+
+Авторы выделили 3 уровня оценки диалога на основе собственных предубеждений и предшествующих работ: Understandability, Sensibleness, and Likability.
+
+- Understandability: ответ должен быть понимаемым(хз что это значит)
+- Sensibleness: должен иметь смысл и подходить по контексту
+- Likability: ответ должен быть более likable(включает в себя понятия diversity, sentiment, specificity, engagement, fluency)
+
+На датасете DailyDialog они показали что задачи valid utterance prediction, next utterance prediction, и masked language models имеют хорошую корреляцию с understandability, sensibleness, and specificity соответственно. А также комбинация данных метрик в единую USL-H, хорошо коррелирует с общей оценкой диалога.
+
+По итогу они создали 3 отдельных метрики $S_U$, $S_S$, $S_L$. И для удобной оценки диалога совместили их в единую (**USL-H**) по следующей формуле.
+
+$S_{USL-H} = \alpha_1S_U+\alpha_2S_S+\alpha_3S_SS_L$
+
+#### Получение метрики Understandability
+
+Сначала рандомно выбрали какое-то количество utterances, потом сгенерировали положительные и отрицательные примеры на основе них.
+Положительные: удаление пунктуации с конца, удаление стоп слов или никак не менять
+Отрицательные: перемешивание всех слов, рандомное удалять какой-то процент слов, повторять некоторые слова по 3 раза
+
+На основе этих примеров они натренировали BERT и используя эмбединг каждого слова в utterance и используя max-pooling они получили utterance-level ембединг, затем они применили softmax. Итоговый результат они обозначили как $S_U$.
+
+#### Получение метрики Sensibleness
+
+Сначала взяли пары реплик из диалогов $(u_i, u_{i+1})$ как они изначально шли в датасете и обозначили их как положительные примеры. Затем они сохранили $u_i$ и сделали пары с рандомными ответами из датасета. Данная тренировка должна была помочь модели является ли 2 этих реплики связанными или нет. Итоговый результат они обозначили как $S_S$.
+
+#### Получение метрики Likability
+
+Взяли каждый utterance отдельно, поочереди промаскировали каждое слово в предложении и вычислили negative log-likelihood для каждого из слова. В качестве модели была использована Roberta (данный механиз подобен метрике USR). Итоговый результат они обозначили как $S_L$.
+
+#### Сбор данных
+
+Они взяли DualEncoder, Seq2Seq with Attention Mechanism, DialoGPT и натренировали их на датасете DailyDialog. Потом на test выборке данного датасета они сгенерировали 250 ответов с контекстом. Наняли 4 разметчика, которые оценивали сгенерированные ответы по следующим критериям: (i) Is this response understandable {0, 1}?, (ii) Does this make sense to the context {0, 1}?, (iii) Does it at least have some detail {0, 1}?, (iv) Overall, how good is this response {0,1,2,3}?
+
+Для оценки попарной согласованности использовалась метрика Cohen’s Kappa. Согласованность низкая по всем направлениям, потому что авторы не давали никаких инструкций при разметке. Самая низкая согласованность оказалась по направлению overall score.
+
+<details>
+    <summary>Уровень попарной согласованности </summary>
+
+![](./metrics/USL_H/annotator_agreement.png)
+
+  </details>
+
+<details>
+    <summary>Корреляция(Pearson) с Overall направлением</summary>
+
+![](./metrics/USL_H/overall_correlation.png)
+
+  </details>
+
+Корреляция(Pearson) с итоговой метрикой USL-H составила 0.6847.
 
 # Исследования про корреляцию метрик
 
