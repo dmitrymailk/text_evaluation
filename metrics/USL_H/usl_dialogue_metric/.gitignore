@@ -11,3 +11,4 @@ dataset/
 predictions
 .DS_Store
 datasets
+usl_models

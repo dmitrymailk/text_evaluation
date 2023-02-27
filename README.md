@@ -1283,6 +1283,14 @@ $S_{USL-H} = \alpha_1S_U+\alpha_2S_S+\alpha_3S_SS_L$
 
 Корреляция(Pearson) с итоговой метрикой USL-H составила 0.6847.
 
+### Пример использования
+
+**не работает**
+
+```bash
+python predict.py --weight-dir usl_models --context-file datasets/dailydialog/dailydialog_test_ctx-small.txt --response-file datasets/dailydialog/dailydialog_test_res-small.txt
+```
+
 # Исследования про корреляцию метрик
 
 ## [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
