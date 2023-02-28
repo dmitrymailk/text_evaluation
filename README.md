@@ -71,7 +71,7 @@
 
 - Область применения: machine translation, summarization
 
-## [Bleu. The Bilingual Evaluation Understudy](https://aclanthology.org/P02-1040.pdf) 
+## [BLEU: a Method for Automatic Evaluation of Machine Translation (July 2002)](https://aclanthology.org/P02-1040.pdf) 
 
 - Область применения: machine translation, summarization,
 - Датасаты с корреляцией: ROCStories, Large Movie Review Conditional, COCO Image Captions, Large Movie Review Unconditional dataset
@@ -90,7 +90,7 @@ BLEU считает количество слов в сгененированн�
 
 #### Пример 1. $BLEU_1$
 
-$BLEU_1(C1) = 3/5 = 0.6$
+$BLEU_1(C1) = 3/len(C1) = 3/5$
 
 Слова the, cat, the. "The" присутствует в R1 и R2. "cat" присутствует в R1 и R2. слова "and" нет в референсах, не учитываем. "the" присутствует, считаем. "dog" - нет.
 
@@ -100,9 +100,9 @@ $BLEU_1(C1) = 3/5 = 0.6$
 
 С2 = The The The The The.
 
-$BLEU_1(C2) = 5/5 = 1$
+$BLEU_1(C2) = 5/len(C2) = 1$
 
-Слово "The" встречается 5 раз. Поэтому мы получили высокий результат для плохого перевода. Для этого воспользуемся слудующей формулой.
+Слово "The" встречается 5 раз. Поэтому мы получили максимальный скор для плохого перевода. Поэтому воспользуемся слудующей формулой.
 
 $Count_{clip} = min(Count,MaxRefCount)$
 
@@ -111,7 +111,7 @@ $Count_{clip} = min(Count,MaxRefCount)$
 
 Используя это ограничение, мы получаем следующее
 
-$BLEU_1(C2) = 2/5 = 0.4$
+$BLEU_1(C2) = 2/len(C2) = 0.4$
 
 Так как в "The cat is on the mat" слово the встречается 2 раза.
 
@@ -122,9 +122,9 @@ $BLEU_1(C2) = 2/5 = 0.4$
 - _C3_: There is a cat on the mat.
 - _C4_: Mat the cat is on a there.
 
-$BLEU_1(C3) = 7/7 = 1$
+$BLEU_1(C3) = 7/len(C3) = 1$
 
-$BLEU_1(C4) = 7/7 = 1$
+$BLEU_1(C4) = 7/len(C4) = 1$
 
 Так как мы не учитываем порядок слов, то оба этих предложения получат максимальный скор.
 
@@ -138,21 +138,25 @@ $BLEU_2(C4) = 0/6 = 0$
 
 #### Пример 4. brevity penalty
 
-- C5: of the
 - R3: It is a guide to action that ensures that the military will forever heed Party commands.
 - R4: It is the guiding principle which guarantees the military forces always being under the command of the Party.
 - R5: It is the practical guide for the army always to heed the directions of the party.
+- C5: of the
 
-"of the" встречается в двух примерах целиком, а это значит что BLUE =1
+"of the" встречается в двух примерах целиком, а это значит что BLUE=1
 
-Чтобы решить эту проблему, авторы предлагают штрафовать предложения, которые короче чем самый ближайший референс.
+Чтобы решить эту проблему, авторы предлагают штрафовать предложения, которые короче чем самый ближайший референс. Они называют это "brevity penalty".
 
 $BP=e^{(1-r/c)}$
 
 - r - длина референса (в токенах)
 - с - длина сгенерированного перевода (в токенах)
 
+#### Пример 5. BLUE-score
+
 $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
+
+$p_n$ - значения BLUE по n-gram  
 
 Авторы предлагают в основном использовать N=4, следовательно $w_n=1/N$.
 
@@ -205,7 +209,7 @@ $BLEU = BP * exp(\sum_{n=1}^Nw_n*logp_n)$
 | MultiWoz            | 0.217     | 0.142     | 0.132  |
 | Wizard of Wikipedia | 0.072     | -0.022    | 0.020  |
 
-#### [USR: An Unsupervised and Reference Free Evaluation Metric for Dialog Generation](https://arxiv.org/pdf/2005.00456.pdf)
+#### [USR: An Unsupervised and Reference Free Evaluation Metric for Dialog Generation (May 2020)](https://arxiv.org/pdf/2005.00456.pdf)
 
 <details>
   <summary>Inter-annotator agreement для Topical-Chat, PersonaChat.</summary>
@@ -320,7 +324,7 @@ for candidate in candidates:
 - https://pypi.org/project/sacrebleu/2.3.1/
 - https://machinelearningmastery.com/calculate-bleu-score-for-text-python/
 
-## [Rouge. Recall-Oriented Understudy for Gisting Evaluation (2004)](https://aclanthology.org/W04-1013.pdf)
+## [ROUGE: A Package for Automatic Evaluation of Summaries (2004)](https://aclanthology.org/W04-1013.pdf)
 
 - Область применения: machine translation, image captioning, question generation, text summarization
 - Подвиды:
@@ -1224,7 +1228,7 @@ USR-MLM метрика считается следующим образом. М�
 # отсутствует описание функций и их документация, не указаны версии пакетов, в итоге ничего не работает.
 ```
 
-## [Deconstruct to Reconstruct a Configurable Evaluation Metric for Open-Domain Dialogue Systems (USL-H metric)](https://aclanthology.org/2020.coling-main.368.pdf)
+## [Deconstruct to Reconstruct a Configurable Evaluation Metric for Open-Domain Dialogue Systems (USL-H metric) (December 13, 2020)](https://aclanthology.org/2020.coling-main.368.pdf)
 
 - Область применения: dialogue evaluation
 - https://github.com/vitouphy/usl_dialogue_metric
@@ -1295,7 +1299,7 @@ python predict.py --weight-dir usl_models --context-file datasets/dailydialog/da
 
 ## [How NOT To Evaluate Your Dialogue System: An Empirical Study of Unsupervised Evaluation (November 1-5, 2016)](https://aclanthology.org/D16-1230.pdf)
 
-## [A Comprehensive Assessment of Dialog Evaluation Metrics](https://arxiv.org/pdf/2106.03706v4.pdf)
+## [A Comprehensive Assessment of Dialog Evaluation Metrics (7 Jul 2021)](https://arxiv.org/pdf/2106.03706v4.pdf)
 
 - https://github.com/exe1023/DialEvalMetrics
 
